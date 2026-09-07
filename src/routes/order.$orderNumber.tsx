@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { CheckCircle2, Clock } from "lucide-react";
+import { CheckCircle2, Clock, Download } from "lucide-react";
 import { getOrderSummary } from "@/lib/commerce.functions";
 import { BrandLockup } from "@/components/brand";
 import { Button } from "@/components/ui/button";
