@@ -1,0 +1,3 @@
+ALTER TABLE public.orders ADD CONSTRAINT orders_agent_profile_fkey FOREIGN KEY (agent_id) REFERENCES public.profiles(id) ON DELETE SET NULL;
+ALTER TABLE public.customers ADD CONSTRAINT customers_agent_profile_fkey FOREIGN KEY (agent_id) REFERENCES public.profiles(id) ON DELETE CASCADE;
+ALTER TABLE public.purchase_links ADD CONSTRAINT purchase_links_agent_profile_fkey FOREIGN KEY (agent_id) REFERENCES public.profiles(id) ON DELETE CASCADE;

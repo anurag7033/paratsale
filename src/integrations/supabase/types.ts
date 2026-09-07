@@ -90,7 +90,15 @@ export type Database = {
           pincode?: string
           state?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "customers_agent_profile_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       orders: {
         Row: {
@@ -157,6 +165,13 @@ export type Database = {
           total_amount?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "orders_agent_profile_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "orders_coupon_id_fkey"
             columns: ["coupon_id"]
@@ -329,6 +344,13 @@ export type Database = {
           visits?: number
         }
         Relationships: [
+          {
+            foreignKeyName: "purchase_links_agent_profile_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "purchase_links_customer_id_fkey"
             columns: ["customer_id"]
