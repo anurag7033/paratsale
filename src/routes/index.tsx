@@ -1,40 +1,35 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect } from "react";
+import { createFileRoute, redirect } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import { homeFor, useAppSession } from "@/lib/session";
+import { BrandLockup } from "@/components/brand";
 
 export const Route = createFileRoute("/")({
   ssr: false,
+  beforeLoad: async () => {
+    const { supabase } = await import("@/integrations/supabase/client");
+    const { fetchRole, homeFor } = await import("@/lib/session");
+    const { data } = await supabase.auth.getUser();
+    if (!data.user) throw redirect({ to: "/auth" });
+    const role = await fetchRole(data.user.id);
+    throw redirect({ to: homeFor(role) });
+  },
   head: () => ({
     meta: [
-      { title: "Parat Haben Systems | Distribution Core" },
+      { title: "Parat Haben Systems | Sales & Product Platform" },
       {
         name: "description",
         content:
-          "Role-based sales and product management platform for Parat Haben Systems — automation, electronics and innovation.",
+          "Internal platform for Parat Haben Systems: manage products, agents, coupons, purchase links and orders.",
       },
-      { property: "og:title", content: "Parat Haben Systems | Distribution Core" },
-      {
-        property: "og:description",
-        content: "Admin and agent dashboards, tracked purchase links, coupons, Razorpay and COD orders.",
-      },
+      { property: "og:title", content: "Parat Haben Systems | Sales & Product Platform" },
+      { property: "og:description", content: "Admin and agent dashboards for products, links, orders and payments." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
-  component: Index,
-});
-
-function Index() {
-  const navigate = useNavigate();
-  const { loading, session, role } = useAppSession();
-
-  useEffect(() => {
-    if (loading) return;
-    navigate({ to: session && role ? homeFor(role) : "/auth", replace: true });
-  }, [loading, session, role, navigate]);
-
-  return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+  component: () => (
+    <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background">
+      <BrandLockup />
+      <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
     </div>
-  );
-}
+  ),
+});
