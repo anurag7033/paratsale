@@ -194,7 +194,7 @@ function InvoicePage() {
           <div className="h-[6px] w-full bg-[hsl(19,92%,52%)]" />
         </div>
 
-        <div className="flex flex-1 flex-col px-10 pb-8 pt-9">
+        <div className="invoice-body flex flex-1 flex-col px-10 pb-8 pt-9">
           {/* Bill to + meta */}
           <div className="grid gap-6 sm:grid-cols-2">
             <div className="rounded-xl border p-6">
