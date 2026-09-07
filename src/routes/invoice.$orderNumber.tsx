@@ -324,7 +324,7 @@ function InvoicePage() {
             </p>
           </div>
 
-          <div className="flex-1" />
+          <div className="invoice-spacer flex-1" />
         </div>
 
         {/* Footer band */}
