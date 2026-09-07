@@ -132,7 +132,7 @@ function InvoicePage() {
             box-shadow: none !important;
             border-radius: 0 !important;
             margin: 0 !important;
-            width: 210mm !important;
+            width: 100% !important;
             min-height: 0 !important;
             height: auto !important;
             max-height: 297mm !important;
