@@ -30,16 +30,18 @@ function AdminCustomers() {
     queryFn: async () => {
       const [{ data: customers, error }, { data: profiles }, { data: orders }] = await Promise.all([
         supabase.from("customers").select("*").order("created_at", { ascending: false }),
-        supabase.from("profiles").select("id,name,email"),
+        supabase.from("profiles").select("id,name,email,phone"),
         supabase.from("orders").select("customer_id, final_amount"),
       ]);
       if (error) throw error;
-      const agentName = new Map((profiles ?? []).map((p) => [p.id, p.name || p.email]));
+      const agentById = new Map((profiles ?? []).map((p) => [p.id, p]));
       return (customers ?? []).map((c) => {
         const own = (orders ?? []).filter((o) => o.customer_id === c.id);
+        const agent = agentById.get(c.agent_id);
         return {
           ...c,
-          agentName: agentName.get(c.agent_id) ?? "—",
+          agentName: agent?.name?.trim() || agent?.email || "Unassigned",
+          agentContact: agent?.phone || agent?.email || "",
           orders: own.length,
           spend: own.reduce((s, o) => s + Number(o.final_amount), 0),
         };
