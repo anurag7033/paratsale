@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { ExternalLink, Pencil, Plus, Trash2 } from "lucide-react";
+import { ExternalLink, Loader2, Pencil, Plus, Trash2, Upload, X } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard-shell";
 import { EmptyState } from "@/components/stat-card";
@@ -76,6 +76,43 @@ function AdminProducts() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<ProductForm>(blank);
+  const [uploading, setUploading] = useState(false);
+
+  const imageList = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
+
+  const uploadImages = async (files: FileList | null) => {
+    if (!files?.length) return;
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const ext = file.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const path = `${crypto.randomUUID()}.${ext}`;
+        const { error } = await supabase.storage.from("product-images").upload(path, file, {
+          contentType: file.type || "image/jpeg",
+        });
+        if (error) throw error;
+        // Long-lived signed link so the public product page can display the photo.
+        const { data, error: signError } = await supabase.storage
+          .from("product-images")
+          .createSignedUrl(path, 60 * 60 * 24 * 365 * 10);
+        if (signError || !data) throw signError ?? new Error("Could not create the image link.");
+        urls.push(data.signedUrl);
+      }
+      setForm((f) => ({ ...f, images: [...f.images.split("\n").map((s) => s.trim()).filter(Boolean), ...urls].join("\n") }));
+      toast.success(urls.length > 1 ? `${urls.length} photos uploaded` : "Photo uploaded");
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Upload failed");
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const removeImage = (url: string) =>
+    setForm((f) => ({
+      ...f,
+      images: f.images.split("\n").map((s) => s.trim()).filter((s) => s && s !== url).join("\n"),
+    }));
 
   const { data: products, isLoading } = useQuery({
     queryKey: ["products"],
@@ -320,8 +357,53 @@ function AdminProducts() {
               />
             </div>
             <div className="space-y-2 sm:col-span-2">
-              <Label>Image URLs (one per line)</Label>
-              <Textarea rows={2} value={form.images} onChange={(e) => setForm({ ...form, images: e.target.value })} />
+              <Label>Product photos</Label>
+              {imageList.length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {imageList.map((url) => (
+                    <div key={url} className="relative h-20 w-20 overflow-hidden rounded-md border">
+                      <img src={url} alt="Product photo" className="h-full w-full object-cover" />
+                      <button
+                        type="button"
+                        onClick={() => removeImage(url)}
+                        className="absolute right-0 top-0 rounded-bl-md bg-background/90 p-1 text-destructive"
+                        aria-label="Remove photo"
+                      >
+                        <X className="h-3 w-3" />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+              <div className="flex items-center gap-3">
+                <Button type="button" variant="outline" size="sm" disabled={uploading} asChild>
+                  <label className="cursor-pointer">
+                    {uploading ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <Upload className="mr-2 h-4 w-4" />
+                    )}
+                    {uploading ? "Uploading…" : "Upload photos"}
+                    <input
+                      type="file"
+                      accept="image/*"
+                      multiple
+                      className="hidden"
+                      onChange={(e) => {
+                        void uploadImages(e.target.files);
+                        e.target.value = "";
+                      }}
+                    />
+                  </label>
+                </Button>
+                <span className="text-xs text-muted-foreground">JPG or PNG, up to 10 MB each.</span>
+              </div>
+              <Textarea
+                rows={2}
+                placeholder="Or paste image links, one per line"
+                value={form.images}
+                onChange={(e) => setForm({ ...form, images: e.target.value })}
+              />
             </div>
             <div className="space-y-2 sm:col-span-2">
               <Label>Specifications (one “Label: value” per line)</Label>
