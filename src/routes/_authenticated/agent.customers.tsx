@@ -37,10 +37,9 @@ type Form = {
   address: string;
   city: string;
   pincode: string;
-  notes: string;
 };
 
-const blank: Form = { name: "", phone: "", email: "", address: "", city: "", pincode: "", notes: "" };
+const blank: Form = { name: "", phone: "", email: "", address: "", city: "", pincode: "" };
 
 function AgentCustomers() {
   const qc = useQueryClient();
@@ -70,7 +69,6 @@ function AgentCustomers() {
         address: form.address.trim(),
         city: form.city.trim(),
         pincode: form.pincode.trim(),
-        notes: form.notes.trim() || null,
         agent_id: session!.user.id,
       };
       const query = form.id
@@ -176,7 +174,6 @@ function AgentCustomers() {
                                 address: c.address,
                                 city: c.city,
                                 pincode: c.pincode,
-                                notes: c.notes ?? "",
                               });
                               setOpen(true);
                             }}
@@ -231,10 +228,6 @@ function AgentCustomers() {
             <div className="space-y-2">
               <Label>Pincode</Label>
               <Input value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Notes (optional)</Label>
-              <Textarea rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
             </div>
             {form.city && (
               <p className="sm:col-span-2 text-xs text-muted-foreground">
