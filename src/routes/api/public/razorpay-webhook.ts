@@ -73,7 +73,7 @@ export const Route = createFileRoute("/api/public/razorpay-webhook")({
 
         const { data: paymentRow } = await supabaseAdmin
           .from("payments")
-          .select("id, order_id")
+          .select("id, order_id, payment_status")
           .eq("razorpay_order_id", payment.order_id)
           .maybeSingle();
 
@@ -81,6 +81,7 @@ export const Route = createFileRoute("/api/public/razorpay-webhook")({
         if (!orderId) return json({ ok: true, unmatched: payment.order_id });
 
         if (event === "payment.captured") {
+          if (paymentRow?.payment_status === "paid") return json({ ok: true, duplicate: true });
           await supabaseAdmin
             .from("orders")
             .update({ payment_status: "paid", order_status: "confirmed" })

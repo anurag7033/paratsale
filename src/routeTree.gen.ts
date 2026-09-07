@@ -29,6 +29,7 @@ import { Route as AuthenticatedAgentIndexRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAgentCustomersRouteImport } from './routes/_authenticated/agent.customers'
 import { Route as AuthenticatedAgentLinksRouteImport } from './routes/_authenticated/agent.links'
 import { Route as AuthenticatedAgentOrdersRouteImport } from './routes/_authenticated/agent.orders'
+import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -136,6 +137,12 @@ const AuthenticatedAgentOrdersRoute =
     path: '/orders',
     getParentRoute: () => AuthenticatedAgentRoute,
   } as any)
+const ApiPublicRazorpayWebhookRoute =
+  ApiPublicRazorpayWebhookRouteImport.update({
+    id: '/api/public/razorpay-webhook',
+    path: '/api/public/razorpay-webhook',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -155,6 +162,7 @@ export interface FileRoutesByFullPath {
   '/agent/customers': typeof AuthenticatedAgentCustomersRoute
   '/agent/links': typeof AuthenticatedAgentLinksRoute
   '/agent/orders': typeof AuthenticatedAgentOrdersRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/agent/': typeof AuthenticatedAgentIndexRoute
 }
@@ -174,6 +182,7 @@ export interface FileRoutesByTo {
   '/agent/customers': typeof AuthenticatedAgentCustomersRoute
   '/agent/links': typeof AuthenticatedAgentLinksRoute
   '/agent/orders': typeof AuthenticatedAgentOrdersRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/agent': typeof AuthenticatedAgentIndexRoute
 }
@@ -197,6 +206,7 @@ export interface FileRoutesById {
   '/_authenticated/agent/customers': typeof AuthenticatedAgentCustomersRoute
   '/_authenticated/agent/links': typeof AuthenticatedAgentLinksRoute
   '/_authenticated/agent/orders': typeof AuthenticatedAgentOrdersRoute
+  '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/agent/': typeof AuthenticatedAgentIndexRoute
 }
@@ -220,6 +230,7 @@ export interface FileRouteTypes {
     | '/agent/customers'
     | '/agent/links'
     | '/agent/orders'
+    | '/api/public/razorpay-webhook'
     | '/admin/'
     | '/agent/'
   fileRoutesByTo: FileRoutesByTo
@@ -239,6 +250,7 @@ export interface FileRouteTypes {
     | '/agent/customers'
     | '/agent/links'
     | '/agent/orders'
+    | '/api/public/razorpay-webhook'
     | '/admin'
     | '/agent'
   id:
@@ -261,6 +273,7 @@ export interface FileRouteTypes {
     | '/_authenticated/agent/customers'
     | '/_authenticated/agent/links'
     | '/_authenticated/agent/orders'
+    | '/api/public/razorpay-webhook'
     | '/_authenticated/admin/'
     | '/_authenticated/agent/'
   fileRoutesById: FileRoutesById
@@ -272,6 +285,7 @@ export interface RootRouteChildren {
   BuyTokenRoute: typeof BuyTokenRoute
   OrderOrderNumberRoute: typeof OrderOrderNumberRoute
   ProductSlugRoute: typeof ProductSlugRoute
+  ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -416,6 +430,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgentOrdersRouteImport
       parentRoute: typeof AuthenticatedAgentRoute
     }
+    '/api/public/razorpay-webhook': {
+      id: '/api/public/razorpay-webhook'
+      path: '/api/public/razorpay-webhook'
+      fullPath: '/api/public/razorpay-webhook'
+      preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -481,6 +502,7 @@ const rootRouteChildren: RootRouteChildren = {
   BuyTokenRoute: BuyTokenRoute,
   OrderOrderNumberRoute: OrderOrderNumberRoute,
   ProductSlugRoute: ProductSlugRoute,
+  ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
