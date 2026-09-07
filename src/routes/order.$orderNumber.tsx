@@ -122,7 +122,12 @@ function OrderPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Button asChild>
+            <Link to="/invoice/$orderNumber" params={{ orderNumber: order.order_number }}>
+              <Download className="h-4 w-4" /> Download invoice
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link to="/">Back to home</Link>
           </Button>
