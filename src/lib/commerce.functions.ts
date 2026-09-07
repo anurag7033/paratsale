@@ -288,16 +288,19 @@ export const getOrderSummary = createServerFn({ method: "GET" })
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select(
-        "order_number, quantity, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, created_at, product_id, agent_id",
+        "order_number, quantity, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, created_at, product_id, agent_id, customer_id",
       )
       .eq("order_number", data.orderNumber.toUpperCase())
       .maybeSingle();
     if (!order) return { found: false as const };
-    const [{ data: product }, { data: agent }] = await Promise.all([
+    const [{ data: product }, { data: agent }, { data: customer }] = await Promise.all([
       supabaseAdmin.from("products").select("name, images").eq("id", order.product_id).maybeSingle(),
       order.agent_id
         ? supabaseAdmin.from("profiles").select("name, phone").eq("id", order.agent_id).maybeSingle()
         : Promise.resolve({ data: null }),
+      order.customer_id
+        ? supabaseAdmin.from("customers").select("name, phone").eq("id", order.customer_id).maybeSingle()
+        : Promise.resolve({ data: null }),
     ]);
-    return { found: true as const, order, product, agent };
+    return { found: true as const, order, product, agent, customer };
   });

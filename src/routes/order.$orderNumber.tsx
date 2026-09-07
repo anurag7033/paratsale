@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
-import { CheckCircle2, Clock } from "lucide-react";
+import { CheckCircle2, Clock, Download } from "lucide-react";
 import { getOrderSummary } from "@/lib/commerce.functions";
 import { BrandLockup } from "@/components/brand";
 import { Button } from "@/components/ui/button";
@@ -122,7 +122,12 @@ function OrderPage() {
           </CardContent>
         </Card>
 
-        <div className="mt-8 text-center">
+        <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+          <Button asChild>
+            <Link to="/invoice/$orderNumber" params={{ orderNumber: order.order_number }}>
+              <Download className="h-4 w-4" /> Download invoice
+            </Link>
+          </Button>
           <Button asChild variant="outline">
             <Link to="/">Back to home</Link>
           </Button>
