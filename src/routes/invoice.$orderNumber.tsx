@@ -113,13 +113,39 @@ function InvoicePage() {
   });
 
   return (
-    <div className="min-h-screen bg-muted/40 py-6 print:bg-white print:py-0">
+    <div className="min-h-screen bg-muted/40 py-6 print:min-h-0 print:bg-white print:py-0">
       <style>{`
         @page { size: A4; margin: 0; }
         @media print {
-          html, body { background: #fff !important; }
+          html, body {
+            background: #fff !important;
+            width: 210mm !important;
+            height: auto !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
           .no-print { display: none !important; }
-          .invoice-sheet { box-shadow: none !important; margin: 0 !important; width: 210mm !important; min-height: 297mm !important; }
+          .invoice-sheet {
+            box-shadow: none !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            width: 210mm !important;
+            min-height: 0 !important;
+            height: auto !important;
+            max-height: 297mm !important;
+            overflow: hidden !important;
+            page-break-after: avoid !important;
+            break-after: avoid !important;
+          }
+          .invoice-sheet, .invoice-sheet * {
+            page-break-inside: avoid !important;
+            break-inside: avoid !important;
+          }
+          .invoice-body { padding-top: 6mm !important; padding-bottom: 6mm !important; }
+          .invoice-spacer { display: none !important; }
         }
       `}</style>
 
@@ -135,6 +161,7 @@ function InvoicePage() {
       </div>
 
       <div className="invoice-sheet mx-auto flex w-[210mm] min-h-[297mm] max-w-full flex-col bg-card shadow-[var(--shadow-elevated)]">
+
         {/* Header band */}
         <div className="relative overflow-hidden bg-[hsl(219,63%,17%)] text-white">
           <div className="absolute inset-y-0 right-0 w-[46%] bg-[hsl(6,30%,26%)]" />
