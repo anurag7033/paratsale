@@ -10,7 +10,6 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -33,13 +32,9 @@ type Form = {
   id?: string;
   name: string;
   phone: string;
-  email: string;
-  address: string;
-  city: string;
-  pincode: string;
 };
 
-const blank: Form = { name: "", phone: "", email: "", address: "", city: "", pincode: "" };
+const blank: Form = { name: "", phone: "" };
 
 function AgentCustomers() {
   const qc = useQueryClient();
@@ -60,15 +55,9 @@ function AgentCustomers() {
   const save = useMutation({
     mutationFn: async () => {
       if (!form.name.trim() || !form.phone.trim()) throw new Error("Name and phone number are required.");
-      if (!form.address.trim() || !form.city.trim() || !form.pincode.trim())
-        throw new Error("Full delivery address, city and pincode are required.");
       const payload = {
         name: form.name.trim(),
         phone: form.phone.trim(),
-        email: form.email.trim() || null,
-        address: form.address.trim(),
-        city: form.city.trim(),
-        pincode: form.pincode.trim(),
         agent_id: session!.user.id,
       };
       const query = form.id
@@ -106,7 +95,7 @@ function AgentCustomers() {
     <>
       <PageHeader
         title="My Customers"
-        description="Only you and the admin can see these records."
+        description="Just a name and a mobile number — the rest is captured at checkout."
         action={
           <Button
             onClick={() => {
@@ -137,7 +126,6 @@ function AgentCustomers() {
                     <TableHead>Customer</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Delivery city</TableHead>
-                    <TableHead>Pincode</TableHead>
                     <TableHead>Added</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
@@ -147,18 +135,23 @@ function AgentCustomers() {
                     <TableRow key={c.id}>
                       <TableCell>
                         <p className="font-medium">{c.name}</p>
-                        <p className="text-xs text-muted-foreground">{c.email ?? "No email"}</p>
+                        <p className="text-xs text-muted-foreground">{c.email ?? "No email yet"}</p>
                       </TableCell>
                       <TableCell className="font-mono text-xs">{c.phone}</TableCell>
                       <TableCell>
-                        {c.city}
-                        {isCodEligible(c.city, c.pincode) && (
-                          <Badge variant="secondary" className="ml-2">
-                            COD available
-                          </Badge>
+                        {c.city ? (
+                          <>
+                            {c.city}
+                            {isCodEligible(c.city, c.pincode) && (
+                              <Badge variant="secondary" className="ml-2">
+                                COD available
+                              </Badge>
+                            )}
+                          </>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">Added at checkout</span>
                         )}
                       </TableCell>
-                      <TableCell>{c.pincode}</TableCell>
                       <TableCell>{shortDate(c.created_at)}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
@@ -166,15 +159,7 @@ function AgentCustomers() {
                             variant="ghost"
                             size="icon"
                             onClick={() => {
-                              setForm({
-                                id: c.id,
-                                name: c.name,
-                                phone: c.phone,
-                                email: c.email ?? "",
-                                address: c.address,
-                                city: c.city,
-                                pincode: c.pincode,
-                              });
+                              setForm({ id: c.id, name: c.name, phone: c.phone });
                               setOpen(true);
                             }}
                           >
@@ -204,38 +189,26 @@ function AgentCustomers() {
           <DialogHeader>
             <DialogTitle>{form.id ? "Edit customer" : "Add customer"}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-4">
             <div className="space-y-2">
-              <Label>Full name</Label>
-              <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-            </div>
-            <div className="space-y-2">
-              <Label>Phone number</Label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Email (optional)</Label>
-              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div className="space-y-2 sm:col-span-2">
-              <Label>Delivery address</Label>
-              <Textarea rows={2} value={form.address} onChange={(e) => setForm({ ...form, address: e.target.value })} />
+              <Label>Customer name</Label>
+              <Input
+                value={form.name}
+                placeholder="e.g. Ramesh Gupta"
+                onChange={(e) => setForm({ ...form, name: e.target.value })}
+              />
             </div>
             <div className="space-y-2">
-              <Label>City</Label>
-              <Input value={form.city} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+              <Label>Mobile number</Label>
+              <Input
+                value={form.phone}
+                placeholder="e.g. +91 98765 43210"
+                onChange={(e) => setForm({ ...form, phone: e.target.value })}
+              />
             </div>
-            <div className="space-y-2">
-              <Label>Pincode</Label>
-              <Input value={form.pincode} onChange={(e) => setForm({ ...form, pincode: e.target.value })} />
-            </div>
-            {form.city && (
-              <p className="sm:col-span-2 text-xs text-muted-foreground">
-                {isCodEligible(form.city, form.pincode)
-                  ? "Cash on delivery will be offered to this customer (Lucknow only)."
-                  : "Cash on delivery is not available outside Lucknow — this customer pays online."}
-              </p>
-            )}
+            <p className="text-xs text-muted-foreground">
+              That's all you need. The customer fills in their delivery address while placing the order.
+            </p>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpen(false)}>
