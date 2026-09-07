@@ -23,7 +23,7 @@ export const Route = createFileRoute("/_authenticated/admin/orders")({
       { property: "og:description", content: "Update order stages and review full order details." },
     ],
   }),
-  component: AdminOrders;
+  component: AdminOrders,
 });
 
 const STAGES = ["pending", "confirmed", "processing", "shipped", "delivered", "cancelled"];
