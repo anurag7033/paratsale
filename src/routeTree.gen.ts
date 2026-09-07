@@ -15,6 +15,7 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAgentRouteImport } from './routes/_authenticated/agent'
 import { Route as BuyTokenRouteImport } from './routes/buy.$token'
+import { Route as InvoiceOrderNumberRouteImport } from './routes/invoice.$orderNumber'
 import { Route as OrderOrderNumberRouteImport } from './routes/order.$orderNumber'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
@@ -58,6 +59,11 @@ const AuthenticatedAgentRoute = AuthenticatedAgentRouteImport.update({
 const BuyTokenRoute = BuyTokenRouteImport.update({
   id: '/buy/$token',
   path: '/buy/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InvoiceOrderNumberRoute = InvoiceOrderNumberRouteImport.update({
+  id: '/invoice/$orderNumber',
+  path: '/invoice/$orderNumber',
   getParentRoute: () => rootRouteImport,
 } as any)
 const OrderOrderNumberRoute = OrderOrderNumberRouteImport.update({
@@ -150,6 +156,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/agent': typeof AuthenticatedAgentRouteWithChildren
   '/buy/$token': typeof BuyTokenRoute
+  '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/buy/$token': typeof BuyTokenRoute
+  '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
@@ -194,6 +202,7 @@ export interface FileRoutesById {
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/agent': typeof AuthenticatedAgentRouteWithChildren
   '/buy/$token': typeof BuyTokenRoute
+  '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
   '/_authenticated/admin/agents': typeof AuthenticatedAdminAgentsRoute
@@ -218,6 +227,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/agent'
     | '/buy/$token'
+    | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
     | '/admin/agents'
@@ -238,6 +248,7 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/buy/$token'
+    | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
     | '/admin/agents'
@@ -261,6 +272,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin'
     | '/_authenticated/agent'
     | '/buy/$token'
+    | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
     | '/_authenticated/admin/agents'
@@ -283,6 +295,7 @@ export interface RootRouteChildren {
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
   BuyTokenRoute: typeof BuyTokenRoute
+  InvoiceOrderNumberRoute: typeof InvoiceOrderNumberRoute
   OrderOrderNumberRoute: typeof OrderOrderNumberRoute
   ProductSlugRoute: typeof ProductSlugRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
@@ -330,6 +343,13 @@ declare module '@tanstack/react-router' {
       path: '/buy/$token'
       fullPath: '/buy/$token'
       preLoaderRoute: typeof BuyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/invoice/$orderNumber': {
+      id: '/invoice/$orderNumber'
+      path: '/invoice/$orderNumber'
+      fullPath: '/invoice/$orderNumber'
+      preLoaderRoute: typeof InvoiceOrderNumberRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/order/$orderNumber': {
@@ -500,6 +520,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
   BuyTokenRoute: BuyTokenRoute,
+  InvoiceOrderNumberRoute: InvoiceOrderNumberRoute,
   OrderOrderNumberRoute: OrderOrderNumberRoute,
   ProductSlugRoute: ProductSlugRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,

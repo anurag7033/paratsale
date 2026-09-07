@@ -55,9 +55,9 @@ const ONES = [
 const TENS = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
 
 function twoDigits(n: number): string {
-  if (n < 20) return ONES[n];
-  const t = TENS[Math.floor(n / 10)];
-  const o = ONES[n % 10];
+  if (n < 20) return ONES[n] ?? "";
+  const t = TENS[Math.floor(n / 10)] ?? "";
+  const o = ONES[n % 10] ?? "";
   return o ? `${t} ${o}` : t;
 }
 
