@@ -237,3 +237,67 @@ export const verifyPayment = createServerFn({ method: "POST" })
 
     return { orderNumber: order.order_number };
   });
+
+/** Public checkout payload for a purchase link (also counts the visit). */
+export const getCheckout = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) => z.object({ token: z.string().min(3).max(120) }).parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: link } = await supabaseAdmin
+      .from("purchase_links")
+      .select("id, status, visits, product_id, customer_id, agent_id")
+      .eq("unique_token", data.token)
+      .maybeSingle();
+    if (!link) return { found: false as const };
+
+    const [{ data: product }, { data: customer }, { data: agent }, { data: coupons }] = await Promise.all([
+      supabaseAdmin
+        .from("products")
+        .select("id, name, slug, description, images, original_price, selling_price, category, stock, specifications, status")
+        .eq("id", link.product_id)
+        .maybeSingle(),
+      supabaseAdmin
+        .from("customers")
+        .select("name, phone, email, address, city, state, pincode")
+        .eq("id", link.customer_id)
+        .maybeSingle(),
+      supabaseAdmin.from("profiles").select("name, phone").eq("id", link.agent_id).maybeSingle(),
+      supabaseAdmin
+        .from("coupons")
+        .select("code, discount_type, discount_value, minimum_purchase, usage_limit, used_count, expiry_date, status")
+        .eq("status", "active"),
+    ]);
+
+    await supabaseAdmin.from("purchase_links").update({ visits: link.visits + 1 }).eq("id", link.id);
+
+    return {
+      found: true as const,
+      status: link.status,
+      product,
+      customer,
+      agent,
+      coupons: coupons ?? [],
+    };
+  });
+
+/** Public order confirmation lookup by order number. */
+export const getOrderSummary = createServerFn({ method: "GET" })
+  .inputValidator((data: unknown) => z.object({ orderNumber: z.string().min(4).max(40) }).parse(data))
+  .handler(async ({ data }) => {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const { data: order } = await supabaseAdmin
+      .from("orders")
+      .select(
+        "order_number, quantity, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, created_at, product_id, agent_id",
+      )
+      .eq("order_number", data.orderNumber.toUpperCase())
+      .maybeSingle();
+    if (!order) return { found: false as const };
+    const [{ data: product }, { data: agent }] = await Promise.all([
+      supabaseAdmin.from("products").select("name, images").eq("id", order.product_id).maybeSingle(),
+      order.agent_id
+        ? supabaseAdmin.from("profiles").select("name, phone").eq("id", order.agent_id).maybeSingle()
+        : Promise.resolve({ data: null }),
+    ]);
+    return { found: true as const, order, product, agent };
+  });

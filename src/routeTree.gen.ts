@@ -14,6 +14,9 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAgentRouteImport } from './routes/_authenticated/agent'
+import { Route as BuyTokenRouteImport } from './routes/buy.$token'
+import { Route as OrderOrderNumberRouteImport } from './routes/order.$orderNumber'
+import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminAgentsRouteImport } from './routes/_authenticated/admin.agents'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
@@ -24,6 +27,8 @@ import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authen
 import { Route as AuthenticatedAdminSalesRouteImport } from './routes/_authenticated/admin.sales'
 import { Route as AuthenticatedAgentIndexRouteImport } from './routes/_authenticated/agent.index'
 import { Route as AuthenticatedAgentCustomersRouteImport } from './routes/_authenticated/agent.customers'
+import { Route as AuthenticatedAgentLinksRouteImport } from './routes/_authenticated/agent.links'
+import { Route as AuthenticatedAgentOrdersRouteImport } from './routes/_authenticated/agent.orders'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -48,6 +53,21 @@ const AuthenticatedAgentRoute = AuthenticatedAgentRouteImport.update({
   id: '/agent',
   path: '/agent',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const BuyTokenRoute = BuyTokenRouteImport.update({
+  id: '/buy/$token',
+  path: '/buy/$token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OrderOrderNumberRoute = OrderOrderNumberRouteImport.update({
+  id: '/order/$orderNumber',
+  path: '/order/$orderNumber',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductSlugRoute = ProductSlugRouteImport.update({
+  id: '/product/$slug',
+  path: '/product/$slug',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/',
@@ -105,12 +125,26 @@ const AuthenticatedAgentCustomersRoute =
     path: '/customers',
     getParentRoute: () => AuthenticatedAgentRoute,
   } as any)
+const AuthenticatedAgentLinksRoute = AuthenticatedAgentLinksRouteImport.update({
+  id: '/links',
+  path: '/links',
+  getParentRoute: () => AuthenticatedAgentRoute,
+} as any)
+const AuthenticatedAgentOrdersRoute =
+  AuthenticatedAgentOrdersRouteImport.update({
+    id: '/orders',
+    path: '/orders',
+    getParentRoute: () => AuthenticatedAgentRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/agent': typeof AuthenticatedAgentRouteWithChildren
+  '/buy/$token': typeof BuyTokenRoute
+  '/order/$orderNumber': typeof OrderOrderNumberRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -119,12 +153,17 @@ export interface FileRoutesByFullPath {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/sales': typeof AuthenticatedAdminSalesRoute
   '/agent/customers': typeof AuthenticatedAgentCustomersRoute
+  '/agent/links': typeof AuthenticatedAgentLinksRoute
+  '/agent/orders': typeof AuthenticatedAgentOrdersRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/agent/': typeof AuthenticatedAgentIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
+  '/buy/$token': typeof BuyTokenRoute
+  '/order/$orderNumber': typeof OrderOrderNumberRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -133,6 +172,8 @@ export interface FileRoutesByTo {
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/sales': typeof AuthenticatedAdminSalesRoute
   '/agent/customers': typeof AuthenticatedAgentCustomersRoute
+  '/agent/links': typeof AuthenticatedAgentLinksRoute
+  '/agent/orders': typeof AuthenticatedAgentOrdersRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/agent': typeof AuthenticatedAgentIndexRoute
 }
@@ -143,6 +184,9 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/agent': typeof AuthenticatedAgentRouteWithChildren
+  '/buy/$token': typeof BuyTokenRoute
+  '/order/$orderNumber': typeof OrderOrderNumberRoute
+  '/product/$slug': typeof ProductSlugRoute
   '/_authenticated/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -151,6 +195,8 @@ export interface FileRoutesById {
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/sales': typeof AuthenticatedAdminSalesRoute
   '/_authenticated/agent/customers': typeof AuthenticatedAgentCustomersRoute
+  '/_authenticated/agent/links': typeof AuthenticatedAgentLinksRoute
+  '/_authenticated/agent/orders': typeof AuthenticatedAgentOrdersRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/agent/': typeof AuthenticatedAgentIndexRoute
 }
@@ -161,6 +207,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/agent'
+    | '/buy/$token'
+    | '/order/$orderNumber'
+    | '/product/$slug'
     | '/admin/agents'
     | '/admin/coupons'
     | '/admin/customers'
@@ -169,12 +218,17 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/sales'
     | '/agent/customers'
+    | '/agent/links'
+    | '/agent/orders'
     | '/admin/'
     | '/agent/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
+    | '/buy/$token'
+    | '/order/$orderNumber'
+    | '/product/$slug'
     | '/admin/agents'
     | '/admin/coupons'
     | '/admin/customers'
@@ -183,6 +237,8 @@ export interface FileRouteTypes {
     | '/admin/products'
     | '/admin/sales'
     | '/agent/customers'
+    | '/agent/links'
+    | '/agent/orders'
     | '/admin'
     | '/agent'
   id:
@@ -192,6 +248,9 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/_authenticated/agent'
+    | '/buy/$token'
+    | '/order/$orderNumber'
+    | '/product/$slug'
     | '/_authenticated/admin/agents'
     | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/customers'
@@ -200,6 +259,8 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/sales'
     | '/_authenticated/agent/customers'
+    | '/_authenticated/agent/links'
+    | '/_authenticated/agent/orders'
     | '/_authenticated/admin/'
     | '/_authenticated/agent/'
   fileRoutesById: FileRoutesById
@@ -208,6 +269,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
+  BuyTokenRoute: typeof BuyTokenRoute
+  OrderOrderNumberRoute: typeof OrderOrderNumberRoute
+  ProductSlugRoute: typeof ProductSlugRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -246,6 +310,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/agent'
       preLoaderRoute: typeof AuthenticatedAgentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/buy/$token': {
+      id: '/buy/$token'
+      path: '/buy/$token'
+      fullPath: '/buy/$token'
+      preLoaderRoute: typeof BuyTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/order/$orderNumber': {
+      id: '/order/$orderNumber'
+      path: '/order/$orderNumber'
+      fullPath: '/order/$orderNumber'
+      preLoaderRoute: typeof OrderOrderNumberRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/product/$slug': {
+      id: '/product/$slug'
+      path: '/product/$slug'
+      fullPath: '/product/$slug'
+      preLoaderRoute: typeof ProductSlugRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
@@ -317,6 +402,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAgentCustomersRouteImport
       parentRoute: typeof AuthenticatedAgentRoute
     }
+    '/_authenticated/agent/links': {
+      id: '/_authenticated/agent/links'
+      path: '/links'
+      fullPath: '/agent/links'
+      preLoaderRoute: typeof AuthenticatedAgentLinksRouteImport
+      parentRoute: typeof AuthenticatedAgentRoute
+    }
+    '/_authenticated/agent/orders': {
+      id: '/_authenticated/agent/orders'
+      path: '/orders'
+      fullPath: '/agent/orders'
+      preLoaderRoute: typeof AuthenticatedAgentOrdersRouteImport
+      parentRoute: typeof AuthenticatedAgentRoute
+    }
   }
 }
 
@@ -347,11 +446,15 @@ const AuthenticatedAdminRouteWithChildren =
 
 interface AuthenticatedAgentRouteChildren {
   AuthenticatedAgentCustomersRoute: typeof AuthenticatedAgentCustomersRoute
+  AuthenticatedAgentLinksRoute: typeof AuthenticatedAgentLinksRoute
+  AuthenticatedAgentOrdersRoute: typeof AuthenticatedAgentOrdersRoute
   AuthenticatedAgentIndexRoute: typeof AuthenticatedAgentIndexRoute
 }
 
 const AuthenticatedAgentRouteChildren: AuthenticatedAgentRouteChildren = {
   AuthenticatedAgentCustomersRoute: AuthenticatedAgentCustomersRoute,
+  AuthenticatedAgentLinksRoute: AuthenticatedAgentLinksRoute,
+  AuthenticatedAgentOrdersRoute: AuthenticatedAgentOrdersRoute,
   AuthenticatedAgentIndexRoute: AuthenticatedAgentIndexRoute,
 }
 
@@ -375,6 +478,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
+  BuyTokenRoute: BuyTokenRoute,
+  OrderOrderNumberRoute: OrderOrderNumberRoute,
+  ProductSlugRoute: ProductSlugRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
