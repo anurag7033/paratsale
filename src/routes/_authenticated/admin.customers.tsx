@@ -100,7 +100,10 @@ function AdminCustomers() {
                           </Badge>
                         )}
                       </TableCell>
-                      <TableCell>{c.agentName}</TableCell>
+                      <TableCell>
+                        <p className="font-medium">{c.agentName}</p>
+                        {c.agentContact && <p className="text-xs text-muted-foreground">{c.agentContact}</p>}
+                      </TableCell>
                       <TableCell>{c.orders}</TableCell>
                       <TableCell className="font-semibold">{inr(c.spend)}</TableCell>
                       <TableCell>{shortDate(c.created_at)}</TableCell>
