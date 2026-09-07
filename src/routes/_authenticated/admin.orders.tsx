@@ -34,11 +34,18 @@ export function useOrdersQuery(agentId?: string) {
     queryFn: async () => {
       let query = supabase.from("orders").select("*").order("created_at", { ascending: false });
       if (agentId) query = query.eq("agent_id", agentId);
-      const [{ data: orders, error }, { data: products }, { data: customers }, { data: profiles }] = await Promise.all([
+      const [
+        { data: orders, error },
+        { data: products },
+        { data: customers },
+        { data: profiles },
+        { data: coupons },
+      ] = await Promise.all([
         query,
         supabase.from("products").select("id,name,slug"),
         supabase.from("customers").select("id,name,phone,city,address,pincode"),
         supabase.from("profiles").select("id,name,email"),
+        supabase.from("coupons").select("id,code"),
       ]);
       if (error) throw error;
       return (orders ?? []).map((o) => ({
@@ -46,6 +53,7 @@ export function useOrdersQuery(agentId?: string) {
         product: (products ?? []).find((p) => p.id === o.product_id) ?? null,
         customer: (customers ?? []).find((c) => c.id === o.customer_id) ?? null,
         agent: (profiles ?? []).find((p) => p.id === o.agent_id) ?? null,
+        coupon_code: (coupons ?? []).find((c) => c.id === o.coupon_id)?.code ?? null,
       }));
     },
   });
