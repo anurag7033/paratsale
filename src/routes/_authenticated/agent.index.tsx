@@ -77,11 +77,10 @@ function AgentHome() {
       />
 
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard label="My customers" value={String(data?.customers.length ?? 0)} icon={UserSquare2} />
         <StatCard label="Purchase links" value={String(data?.links.length ?? 0)} icon={Link2} />
         <StatCard label="My orders" value={String(orders.length)} icon={ShoppingCart} />
-        <StatCard label="Revenue generated" value={inr(revenue)} icon={IndianRupee} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
