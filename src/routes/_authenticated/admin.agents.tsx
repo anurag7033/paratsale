@@ -251,12 +251,12 @@ function AdminAgents() {
       </Dialog>
 
       <Sheet open={!!detail} onOpenChange={(v) => !v && setDetail(null)}>
-        <SheetContent className="w-full sm:max-w-md">
-          <SheetHeader>
+        <SheetContent className="flex w-full flex-col sm:max-w-md">
+          <SheetHeader className="shrink-0">
             <SheetTitle>{detail?.name}</SheetTitle>
           </SheetHeader>
           {detail && (
-            <div className="space-y-4 p-4 text-sm">
+            <div className="flex-1 space-y-4 overflow-y-auto p-4 text-sm">
               <div className="grid grid-cols-2 gap-3">
                 {[
                   ["Agent ID", `AGT-${detail.id.slice(0, 6).toUpperCase()}`],
