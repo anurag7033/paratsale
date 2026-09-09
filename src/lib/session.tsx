@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import type { Session } from "@supabase/supabase-js";
 
-export type Role = "admin" | "agent";
+export type Role = "super_admin" | "admin" | "agent";
 
 export type AppSession = {
   loading: boolean;
@@ -68,4 +68,4 @@ export function useAppSession(): AppSession {
 }
 
 export const homeFor = (role: Role | null) =>
-  role === "admin" ? "/admin" : role === "agent" ? "/agent" : "/auth";
+  role === "super_admin" || role === "admin" ? "/admin" : role === "agent" ? "/agent" : "/auth";

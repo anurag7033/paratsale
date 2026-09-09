@@ -12,7 +12,7 @@ export const Route = createFileRoute("/_authenticated")({
       .eq("user_id", data.session.user.id)
       .limit(1)
       .maybeSingle();
-    return { role: (roleRow?.role ?? null) as "admin" | "agent" | null };
+    return { role: (roleRow?.role ?? null) as "super_admin" | "admin" | "agent" | null };
   },
   component: () => <Outlet />,
 });
