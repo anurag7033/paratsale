@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IndianRupee, Link2, ShoppingCart, UserSquare2 } from "lucide-react";
+import { Link2, ShoppingCart, UserSquare2 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard-shell";
@@ -52,7 +52,6 @@ function AgentHome() {
   });
 
   const orders = data?.orders ?? [];
-  const revenue = orders.reduce((s, o) => s + Number(o.final_amount), 0);
   const paid = orders.filter((o) => o.payment_status === "paid");
 
   const byMonth = orders.reduce<Record<string, number>>((acc, o) => {
