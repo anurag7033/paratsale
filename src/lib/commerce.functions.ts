@@ -128,6 +128,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       total_amount: total,
       discount_amount: discount,
       final_amount: final,
+      shipping_amount: shipping,
       payment_method: data.paymentMethod,
       payment_status: "pending",
       order_status: "pending",
