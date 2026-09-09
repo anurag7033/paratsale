@@ -4,9 +4,13 @@ import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
 type Role = "super_admin" | "admin" | "agent";
 
+const RANK: Record<Role, number> = { super_admin: 3, admin: 2, agent: 1 };
+
 async function roleOf(supabase: any, userId: string): Promise<Role | null> {
-  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId).limit(1).maybeSingle();
-  return (data?.role as Role) ?? null;
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  const roles = ((data ?? []) as { role: Role }[]).map((r) => r.role).filter((r) => r in RANK);
+  if (!roles.length) return null;
+  return roles.sort((a, b) => RANK[b] - RANK[a])[0]!;
 }
 
 async function assertSuperAdmin(supabase: any, userId: string) {
