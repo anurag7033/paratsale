@@ -315,6 +315,7 @@ export type Database = {
           bpo_name: string | null
           bpo_pincode: string | null
           bpo_state: string | null
+          commission_per_device: number
           created_at: string
           email: string
           id: string
@@ -330,6 +331,7 @@ export type Database = {
           bpo_name?: string | null
           bpo_pincode?: string | null
           bpo_state?: string | null
+          commission_per_device?: number
           created_at?: string
           email?: string
           id: string
@@ -345,6 +347,7 @@ export type Database = {
           bpo_name?: string | null
           bpo_pincode?: string | null
           bpo_state?: string | null
+          commission_per_device?: number
           created_at?: string
           email?: string
           id?: string
