@@ -92,6 +92,10 @@ function OrderPage() {
                 <span>-{inr(order.discount_amount)}</span>
               </div>
             )}
+            <div className="flex justify-between">
+              <span>Shipping charges</span>
+              <span>{Number(order.shipping_amount) > 0 ? inr(order.shipping_amount) : "Free"}</span>
+            </div>
             <div className="flex justify-between border-t pt-4 text-lg font-bold">
               <span>Total</span>
               <span>{inr(order.final_amount)}</span>
