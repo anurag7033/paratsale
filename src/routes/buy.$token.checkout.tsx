@@ -6,13 +6,16 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   BadgePercent,
+  Building2,
   CheckCircle2,
   Crosshair,
   Loader2,
   MapPin,
   PackageCheck,
+  Phone,
   ShieldCheck,
   Truck,
+  User,
 } from "lucide-react";
 import { getCheckout, placeOrder, verifyPayment } from "@/lib/commerce.functions";
 import { BrandLockup } from "@/components/brand";
