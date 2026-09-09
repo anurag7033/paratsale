@@ -110,14 +110,20 @@ function AdminHome() {
         <StatCard label="Total Agents" value={data?.agents ?? 0} icon={Users} loading={isLoading} />
         <StatCard label="Total Customers" value={data?.customers ?? 0} icon={UserSquare2} loading={isLoading} />
         <StatCard label="Total Sales" value={data?.orders ?? 0} icon={ShoppingCart} loading={isLoading} hint="orders placed" />
-        <StatCard label="Total Revenue" value={inr(data?.revenue ?? 0)} icon={IndianRupee} loading={isLoading} />
+        <StatCard
+          label={isSuper ? "Net Revenue" : "My Commission"}
+          value={inr(data?.revenue ?? 0)}
+          icon={IndianRupee}
+          loading={isLoading}
+          hint={isSuper ? "after BPO commission" : "delivered & paid orders"}
+        />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card className="shadow-[var(--shadow-card)]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-accent" /> Revenue by month
+              <TrendingUp className="h-4 w-4 text-accent" /> {isSuper ? "Net revenue by month" : "Commission by month"}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-64">
