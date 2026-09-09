@@ -31,6 +31,7 @@ type OrderDraft = {
   total_amount: number;
   discount_amount: number;
   final_amount: number;
+  shipping_amount: number;
   payment_method: string;
   payment_status: string;
   order_status: string;
