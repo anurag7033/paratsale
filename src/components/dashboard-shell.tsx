@@ -2,7 +2,7 @@ import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { ChevronLeft, Loader2, LogOut, MapPin, Menu, Search, ShieldCheck, Truck, X } from "lucide-react";
+import { ChevronLeft, Loader2, LogOut, MapPin, Menu, Search, ShieldCheck, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLockup } from "@/components/brand";
@@ -199,6 +199,7 @@ export function DashboardShell({
               </button>
             </div>
             {nav}
+            <SidebarShippingCalculator />
           </aside>
         </div>
       )}
