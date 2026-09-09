@@ -275,6 +275,15 @@ function InvoicePage() {
                 <span className="text-right font-semibold">-{money(Number(order.discount_amount))}</span>
               </div>
             )}
+            {Number(order.shipping_amount) > 0 && (
+              <div className="grid grid-cols-[40px_1fr_60px_120px_130px] items-center gap-2 border-t px-6 py-4 text-sm">
+                <span />
+                <span className="font-medium">Shipping charges</span>
+                <span />
+                <span />
+                <span className="text-right font-semibold">{money(Number(order.shipping_amount))}</span>
+              </div>
+            )}
           </div>
 
           {/* Words + totals */}

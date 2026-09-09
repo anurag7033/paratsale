@@ -15,6 +15,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Switch } from "@/components/ui/switch";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useAppSession } from "@/lib/session";
+import { ShippingCalculator } from "@/components/shipping-calculator";
+import { Input } from "@/components/ui/input";
 import { inr, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/agent/links")({
@@ -38,6 +40,7 @@ function AgentLinks() {
   const [open, setOpen] = useState(false);
   const [customerId, setCustomerId] = useState("");
   const [productId, setProductId] = useState("");
+  const [shipping, setShipping] = useState(0);
 
   const { data } = useQuery({
     queryKey: ["agent-links"],
@@ -74,6 +77,7 @@ function AgentLinks() {
         customer_id: customerId,
         product_id: productId,
         unique_token: token(),
+        shipping_amount: shipping,
       });
       if (error) throw error;
     },
@@ -82,6 +86,7 @@ function AgentLinks() {
       setOpen(false);
       setCustomerId("");
       setProductId("");
+      setShipping(0);
       void qc.invalidateQueries({ queryKey: ["agent-links"] });
     },
     onError: (e: Error) => toast.error(e.message),
@@ -136,6 +141,7 @@ function AgentLinks() {
                   <TableHead>Customer</TableHead>
                   <TableHead>Product</TableHead>
                   <TableHead>Link</TableHead>
+                  <TableHead>Shipping</TableHead>
                   <TableHead>Visits</TableHead>
                   <TableHead>Orders</TableHead>
                   <TableHead>Revenue</TableHead>
@@ -155,6 +161,9 @@ function AgentLinks() {
                       </TableCell>
                       <TableCell>{l.product?.name ?? "—"}</TableCell>
                       <TableCell className="font-mono text-xs">{l.unique_token}</TableCell>
+                      <TableCell>
+                        {Number(l.shipping_amount) > 0 ? inr(Number(l.shipping_amount)) : "Free"}
+                      </TableCell>
                       <TableCell>{l.visits}</TableCell>
                       <TableCell>{l.orders}</TableCell>
                       <TableCell className="font-semibold">{inr(l.revenue)}</TableCell>
@@ -242,6 +251,30 @@ function AgentLinks() {
                     ))}
                 </SelectContent>
               </Select>
+            </div>
+            <div className="space-y-2 rounded-lg border p-3">
+              <Label>Shipment charge</Label>
+              <p className="text-xs text-muted-foreground">
+                Check the customer's pincode, then choose a charge. It is added to the customer's total at checkout.
+              </p>
+              <ShippingCalculator
+                compact
+                selectedAmount={shipping}
+                initialPincode={
+                  (data?.customers ?? []).find((c) => c.id === customerId)?.pincode ?? ""
+                }
+                onPick={(amount) => setShipping(amount)}
+              />
+              <div className="flex items-center gap-2 pt-1">
+                <span className="text-xs text-muted-foreground">Or set your own</span>
+                <Input
+                  className="h-8 w-28"
+                  inputMode="numeric"
+                  value={shipping}
+                  onChange={(e) => setShipping(Math.max(0, Number(e.target.value.replace(/\D/g, "")) || 0))}
+                />
+                <span className="text-xs font-medium">Applied: {shipping > 0 ? inr(shipping) : "Free"}</span>
+              </div>
             </div>
             {!data?.customers.length && (
               <p className="text-xs text-muted-foreground">Add a customer first to create a link.</p>

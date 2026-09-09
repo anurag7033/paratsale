@@ -31,6 +31,7 @@ type OrderDraft = {
   total_amount: number;
   discount_amount: number;
   final_amount: number;
+  shipping_amount: number;
   payment_method: string;
   payment_status: string;
   order_status: string;
@@ -62,7 +63,7 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     const { data: link } = await supabaseAdmin
       .from("purchase_links")
-      .select("id, agent_id, customer_id, product_id, status")
+      .select("id, agent_id, customer_id, product_id, status, shipping_amount")
       .eq("unique_token", data.token)
       .maybeSingle();
     if (!link || link.status !== "active") throw new Error("This purchase link is no longer valid.");
@@ -96,7 +97,9 @@ export const placeOrder = createServerFn({ method: "POST" })
       couponId = coupon.id;
     }
 
-    const final = total - discount;
+    // Shipment charge is the amount the agent fixed on this purchase link.
+    const shipping = Math.max(0, Number(link.shipping_amount ?? 0));
+    const final = total - discount + shipping;
 
     await supabaseAdmin
       .from("customers")
@@ -125,6 +128,7 @@ export const placeOrder = createServerFn({ method: "POST" })
       total_amount: total,
       discount_amount: discount,
       final_amount: final,
+      shipping_amount: shipping,
       payment_method: data.paymentMethod,
       payment_status: "pending",
       order_status: "pending",
@@ -294,7 +298,7 @@ export const getCheckout = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: link } = await supabaseAdmin
       .from("purchase_links")
-      .select("id, status, visits, product_id, customer_id, agent_id")
+      .select("id, status, visits, product_id, customer_id, agent_id, shipping_amount")
       .eq("unique_token", data.token)
       .maybeSingle();
     if (!link) return { found: false as const };
@@ -344,6 +348,7 @@ export const getCheckout = createServerFn({ method: "GET" })
       customer,
       agent,
       coupons: coupons ?? [],
+      shippingAmount: Math.max(0, Number(link.shipping_amount ?? 0)),
     };
   });
 
@@ -355,7 +360,7 @@ export const getOrderSummary = createServerFn({ method: "GET" })
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select(
-        "order_number, quantity, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, shipping_latitude, shipping_longitude, created_at, product_id, agent_id, customer_id",
+        "order_number, quantity, total_amount, discount_amount, final_amount, shipping_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, shipping_latitude, shipping_longitude, created_at, product_id, agent_id, customer_id",
       )
       .eq("order_number", data.orderNumber.toUpperCase())
       .maybeSingle();

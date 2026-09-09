@@ -111,7 +111,8 @@ function Checkout() {
   const savingsOnList = Math.max(0, listTotal - subtotal);
   const appliedCoupon = applied ? (data.coupons ?? []).find((c) => c.code === applied.code) : undefined;
   const discount = appliedCoupon ? (couponDiscount(appliedCoupon, subtotal).discount ?? 0) : 0;
-  const total = Math.max(0, subtotal - discount);
+  const shipping = data.found ? Number(data.shippingAmount ?? 0) : 0;
+  const total = Math.max(0, subtotal - discount) + shipping;
   const codAllowed = isCodEligible(form.city, form.pincode);
 
   function captureLocation() {
@@ -449,6 +450,10 @@ function Checkout() {
                     <span>-{inr(discount)}</span>
                   </div>
                 )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping charges</span>
+                  <span>{shipping > 0 ? inr(shipping) : "Free"}</span>
+                </div>
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total payable</span>
                   <span>{inr(total)}</span>
