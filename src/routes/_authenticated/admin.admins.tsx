@@ -16,7 +16,7 @@ import { Switch } from "@/components/ui/switch";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { shortDate } from "@/lib/format";
+import { inr, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/admin/admins")({
   beforeLoad: ({ context }) => {
@@ -38,6 +38,7 @@ const blank = {
   email: "",
   phone: "",
   password: "",
+  commission_per_device: "",
   bpo_name: "",
   bpo_contact_person: "",
   bpo_address: "",
@@ -58,7 +59,11 @@ function SuperAdmins() {
     queryFn: async () => {
       const [{ data: roles }, { data: profiles }] = await Promise.all([
         supabase.from("user_roles").select("user_id,role"),
-        supabase.from("profiles").select("id,name,email,phone,status,created_at,admin_id,bpo_name,bpo_city,bpo_state"),
+        supabase
+          .from("profiles")
+          .select(
+            "id,name,email,phone,status,created_at,admin_id,bpo_name,bpo_city,bpo_state,commission_per_device",
+          ),
       ]);
       const adminIds = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
       return (profiles ?? [])
@@ -81,12 +86,16 @@ function SuperAdmins() {
       if (phone.replace(/\D/g, "").length < 6) throw new Error("Please enter a valid mobile number.");
       if (form.password.length < 8) throw new Error("The temporary password needs at least 8 characters.");
       if (form.bpo_name.trim().length < 2) throw new Error("Please enter the BPO (calling agency) name.");
+      const commission = Number(form.commission_per_device);
+      if (!form.commission_per_device.trim() || !Number.isFinite(commission) || commission < 0)
+        throw new Error("Please enter the commission amount per device.");
       const res = await create({
         data: {
           name,
           email,
           phone,
           password: form.password,
+          commission_per_device: commission,
           bpo_name: form.bpo_name.trim(),
           bpo_contact_person: form.bpo_contact_person.trim(),
           bpo_address: form.bpo_address.trim(),
@@ -148,6 +157,7 @@ function SuperAdmins() {
                   <TableHead>Admin</TableHead>
                   <TableHead>BPO</TableHead>
                   <TableHead>Phone</TableHead>
+                  <TableHead>Commission / device</TableHead>
                   <TableHead>Agents</TableHead>
                   <TableHead>Added</TableHead>
                   <TableHead>Account</TableHead>
@@ -168,6 +178,7 @@ function SuperAdmins() {
                       </p>
                     </TableCell>
                     <TableCell>{a.phone ?? "—"}</TableCell>
+                    <TableCell className="font-medium">{inr(Number(a.commission_per_device ?? 0))}</TableCell>
                     <TableCell>{a.agents}</TableCell>
                     <TableCell>{shortDate(a.created_at)}</TableCell>
                     <TableCell>
@@ -247,6 +258,20 @@ function SuperAdmins() {
             <div className="space-y-2">
               <Label>Phone number</Label>
               <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            </div>
+            <div className="space-y-2">
+              <Label>Commission per device (₹)</Label>
+              <Input
+                type="number"
+                min={0}
+                value={form.commission_per_device}
+                placeholder="e.g. 500"
+                onChange={(e) => setForm({ ...form, commission_per_device: e.target.value })}
+              />
+              <p className="text-xs text-muted-foreground">
+                This BPO earns this amount for every device delivered and paid. Company revenue is the product price
+                minus this commission.
+              </p>
             </div>
             <div className="space-y-2">
               <Label>Temporary password (min 8 characters)</Label>

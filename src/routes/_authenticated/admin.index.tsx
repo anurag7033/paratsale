@@ -34,30 +34,53 @@ export const Route = createFileRoute("/_authenticated/admin/")({
 });
 
 function AdminHome() {
+  const { role } = Route.useRouteContext() as { role?: string };
+  const isSuper = role === "super_admin";
+
   const { data, isLoading } = useQuery({
-    queryKey: ["admin-overview"],
+    queryKey: ["admin-overview", isSuper],
     queryFn: async () => {
-      const [products, agents, customers, orders] = await Promise.all([
+      const [products, agents, customers, orders, people] = await Promise.all([
         supabase.from("products").select("id", { count: "exact", head: true }),
         supabase.from("user_roles").select("user_id", { count: "exact", head: true }).eq("role", "agent"),
         supabase.from("customers").select("id", { count: "exact", head: true }),
         supabase
           .from("orders")
           .select(
-            "id, order_number, final_amount, payment_method, payment_status, order_status, created_at, customers(name), products(name), profiles:agent_id(name)",
+            "id, order_number, agent_id, quantity, final_amount, payment_method, payment_status, order_status, created_at, customers(name), products(name), profiles:agent_id(name)",
           )
           .order("created_at", { ascending: false }),
+        supabase.from("profiles").select("id, admin_id, commission_per_device"),
       ]);
       const rows = orders.data ?? [];
-      const revenue = rows
-        .filter((o) => o.payment_status === "paid" || o.payment_method === "cod")
-        .reduce((sum, o) => sum + Number(o.final_amount), 0);
+      const byId = new Map((people.data ?? []).map((p) => [p.id, p]));
+
+      const commissionOf = (agentId: string | null) => {
+        if (!agentId) return 0;
+        const agent = byId.get(agentId);
+        if (!agent) return 0;
+        const owner = agent.admin_id ? byId.get(agent.admin_id) : null;
+        return Number((owner ?? agent).commission_per_device ?? 0);
+      };
+
+      const settled = (o: (typeof rows)[number]) => o.order_status === "delivered" && o.payment_status === "paid";
+
+      const valueOf = (o: (typeof rows)[number]) => {
+        const commission = commissionOf(o.agent_id) * Number(o.quantity ?? 1);
+        if (isSuper) {
+          if (!(o.payment_status === "paid" || o.payment_method === "cod")) return 0;
+          return Math.max(0, Number(o.final_amount) - (settled(o) ? commission : 0));
+        }
+        return settled(o) ? commission : 0;
+      };
+
+      const revenue = rows.reduce((sum, o) => sum + valueOf(o), 0);
 
       const byMonth = new Map<string, { month: string; revenue: number; orders: number }>();
       rows.forEach((o) => {
         const key = new Date(o.created_at).toLocaleDateString("en-IN", { month: "short", year: "2-digit" });
         const entry = byMonth.get(key) ?? { month: key, revenue: 0, orders: 0 };
-        entry.revenue += Number(o.final_amount);
+        entry.revenue += valueOf(o);
         entry.orders += 1;
         byMonth.set(key, entry);
       });
@@ -87,14 +110,20 @@ function AdminHome() {
         <StatCard label="Total Agents" value={data?.agents ?? 0} icon={Users} loading={isLoading} />
         <StatCard label="Total Customers" value={data?.customers ?? 0} icon={UserSquare2} loading={isLoading} />
         <StatCard label="Total Sales" value={data?.orders ?? 0} icon={ShoppingCart} loading={isLoading} hint="orders placed" />
-        <StatCard label="Total Revenue" value={inr(data?.revenue ?? 0)} icon={IndianRupee} loading={isLoading} />
+        <StatCard
+          label={isSuper ? "Net Revenue" : "My Commission"}
+          value={inr(data?.revenue ?? 0)}
+          icon={IndianRupee}
+          loading={isLoading}
+          hint={isSuper ? "after BPO commission" : "delivered & paid orders"}
+        />
       </div>
 
       <div className="mt-6 grid gap-4 lg:grid-cols-2">
         <Card className="shadow-[var(--shadow-card)]">
           <CardHeader>
             <CardTitle className="flex items-center gap-2 text-base">
-              <TrendingUp className="h-4 w-4 text-accent" /> Revenue by month
+              <TrendingUp className="h-4 w-4 text-accent" /> {isSuper ? "Net revenue by month" : "Commission by month"}
             </CardTitle>
           </CardHeader>
           <CardContent className="h-64">
