@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Pencil, Plus, Trash2 } from "lucide-react";
+import { Copy, Pencil, Plus, Trash2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard-shell";
 import { EmptyState } from "@/components/stat-card";
@@ -12,9 +12,11 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ShippingCalculator } from "@/components/shipping-calculator";
 import { useAppSession } from "@/lib/session";
-import { isCodEligible, shortDate } from "@/lib/format";
+import { inr, isCodEligible, shortDate } from "@/lib/format";
 
 export const Route = createFileRoute("/_authenticated/agent/customers")({
   head: () => ({
@@ -35,6 +37,10 @@ type Form = {
 };
 
 const blank: Form = { name: "", phone: "" };
+
+const newToken = () =>
+  `${Math.random().toString(36).slice(2, 8)}${Date.now().toString(36).slice(-4)}`.toUpperCase();
+
 
 function AgentCustomers() {
   const qc = useQueryClient();
