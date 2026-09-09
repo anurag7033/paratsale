@@ -267,6 +267,42 @@ function Checkout() {
 
       <main className="mx-auto grid max-w-6xl gap-6 px-4 pb-16 pt-4 lg:grid-cols-[1.2fr_1fr]">
         <div className="space-y-6">
+          {data.agent && (
+            <Card className="shadow-[var(--shadow-card)]">
+              <CardContent className="space-y-3 p-5 text-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sold by</p>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  <div className="space-y-2">
+                    <p className="inline-flex items-center gap-2 font-semibold">
+                      <Building2 className="h-4 w-4 text-primary" />
+                      {data.agent.bpo_name || data.agent.name}
+                    </p>
+                    {data.agent.bpo_contact_person && (
+                      <p className="inline-flex items-center gap-2 text-muted-foreground">
+                        <User className="h-4 w-4" /> {data.agent.bpo_contact_person}
+                      </p>
+                    )}
+                    {data.agent.phone && (
+                      <p className="inline-flex items-center gap-2 text-muted-foreground">
+                        <Phone className="h-4 w-4" /> {data.agent.phone}
+                      </p>
+                    )}
+                  </div>
+                  {(data.agent.bpo_address || data.agent.bpo_city) && (
+                    <div className="inline-flex items-start gap-2 text-muted-foreground">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>
+                        {[data.agent.bpo_address, data.agent.bpo_city, data.agent.bpo_state, data.agent.bpo_pincode]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Card className="shadow-[var(--shadow-card)]">
             <CardHeader>
               <CardTitle className="text-base">Delivery details</CardTitle>
@@ -455,39 +491,6 @@ function Checkout() {
             </CardContent>
           </Card>
 
-          {data.agent && (
-            <Card>
-              <CardContent className="space-y-3 p-5 text-sm">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sold by</p>
-                <div className="space-y-2">
-                  <p className="inline-flex items-center gap-2 font-semibold">
-                    <Building2 className="h-4 w-4 text-primary" />
-                    {data.agent.bpo_name || data.agent.name}
-                  </p>
-                  {data.agent.bpo_contact_person && (
-                    <p className="inline-flex items-center gap-2 text-muted-foreground">
-                      <User className="h-4 w-4" /> {data.agent.bpo_contact_person}
-                    </p>
-                  )}
-                  {data.agent.phone && (
-                    <p className="inline-flex items-center gap-2 text-muted-foreground">
-                      <Phone className="h-4 w-4" /> {data.agent.phone}
-                    </p>
-                  )}
-                  {(data.agent.bpo_address || data.agent.bpo_city) && (
-                    <p className="inline-flex items-start gap-2 text-muted-foreground">
-                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                      <span>
-                        {[data.agent.bpo_address, data.agent.bpo_city, data.agent.bpo_state, data.agent.bpo_pincode]
-                          .filter(Boolean)
-                          .join(", ")}
-                      </span>
-                    </p>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
         </div>
       </main>
     </div>
