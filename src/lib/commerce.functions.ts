@@ -21,7 +21,40 @@ const checkoutSchema = z.object({
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
 
-/** Creates the order server-side after re-validating price, stock, coupon and COD rules. */
+type OrderDraft = {
+  customer_id: string;
+  agent_id: string;
+  product_id: string;
+  purchase_link_id: string;
+  coupon_id: string | null;
+  quantity: number;
+  total_amount: number;
+  discount_amount: number;
+  final_amount: number;
+  payment_method: string;
+  payment_status: string;
+  order_status: string;
+  shipping_address: string;
+  shipping_city: string;
+  shipping_state: string;
+  shipping_pincode: string;
+  shipping_latitude: number | null;
+  shipping_longitude: number | null;
+  shipping_location_accuracy: number | null;
+};
+
+async function signDraft(payload: string) {
+  const secret = process.env["RAZORPAY_KEY_SECRET"] ?? process.env["SUPABASE_SERVICE_ROLE_KEY"] ?? "";
+  const { createHmac } = await import("crypto");
+  return createHmac("sha256", secret).update(payload).digest("hex");
+}
+
+/**
+ * Re-validates price, stock, coupon and COD rules.
+ * Cash-on-delivery orders are created straight away. Online payments are only
+ * turned into a real order after the payment signature is verified, so an
+ * abandoned or failed payment never shows up in the agent's account.
+ */
 export const placeOrder = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => checkoutSchema.parse(data))
   .handler(async ({ data }) => {
@@ -82,54 +115,41 @@ export const placeOrder = createServerFn({ method: "POST" })
       })
       .eq("id", link.customer_id);
 
-    const { data: order, error } = await supabaseAdmin
-      .from("orders")
-      .insert({
-        customer_id: link.customer_id,
-        agent_id: link.agent_id,
-        product_id: product.id,
-        purchase_link_id: link.id,
-        coupon_id: couponId,
-        quantity: data.quantity,
-        total_amount: total,
-        discount_amount: discount,
-        final_amount: final,
-        payment_method: data.paymentMethod,
-        payment_status: "pending",
-        order_status: data.paymentMethod === "cod" ? "confirmed" : "pending",
-        shipping_address: data.address,
-        shipping_city: data.city,
-        shipping_state: data.state,
-        shipping_pincode: data.pincode,
-        shipping_latitude: data.latitude ?? null,
-        shipping_longitude: data.longitude ?? null,
-        shipping_location_accuracy: data.locationAccuracy ?? null,
-      })
-      .select("id, order_number, final_amount")
-      .single();
-    if (error || !order) throw new Error(error?.message ?? "Could not create the order.");
+    const draft: OrderDraft = {
+      customer_id: link.customer_id,
+      agent_id: link.agent_id,
+      product_id: product.id,
+      purchase_link_id: link.id,
+      coupon_id: couponId,
+      quantity: data.quantity,
+      total_amount: total,
+      discount_amount: discount,
+      final_amount: final,
+      payment_method: data.paymentMethod,
+      payment_status: "pending",
+      order_status: "pending",
+      shipping_address: data.address,
+      shipping_city: data.city,
+      shipping_state: data.state,
+      shipping_pincode: data.pincode,
+      shipping_latitude: data.latitude ?? null,
+      shipping_longitude: data.longitude ?? null,
+      shipping_location_accuracy: data.locationAccuracy ?? null,
+    };
 
-    if (couponId) {
-
-      const { data: c } = await supabaseAdmin
-        .from("coupons")
-        .select("used_count")
-        .eq("id", couponId)
-        .single();
-      await supabaseAdmin
-        .from("coupons")
-        .update({ used_count: (c?.used_count ?? 0) + 1 })
-        .eq("id", couponId);
-    }
-
+    // Cash on delivery: nothing to pay online, so the order is created now.
     if (data.paymentMethod === "cod") {
+      const { data: order, error } = await supabaseAdmin
+        .from("orders")
+        .insert({ ...draft, order_status: "confirmed" })
+        .select("id, order_number, final_amount")
+        .single();
+      if (error || !order) throw new Error(error?.message ?? "Could not create the order.");
+
+      if (couponId) await bumpCoupon(couponId);
       await supabaseAdmin.from("products").update({ stock: product.stock - data.quantity }).eq("id", product.id);
-      await supabaseAdmin
-        .from("purchase_links")
-        .update({ status: "converted" })
-        .eq("id", link.id);
+      await supabaseAdmin.from("purchase_links").update({ status: "converted" }).eq("id", link.id);
       return {
-        orderId: order.id,
         orderNumber: order.order_number,
         amount: Number(order.final_amount),
         mode: "cod" as const,
@@ -139,12 +159,7 @@ export const placeOrder = createServerFn({ method: "POST" })
     const keyId = process.env["RAZORPAY_KEY_ID"];
     const keySecret = process.env["RAZORPAY_KEY_SECRET"];
     if (!keyId || !keySecret) {
-      return {
-        orderId: order.id,
-        orderNumber: order.order_number,
-        amount: Number(order.final_amount),
-        mode: "razorpay_unconfigured" as const,
-      };
+      return { mode: "razorpay_unconfigured" as const, amount: final };
     }
 
     const rzpRes = await fetch("https://api.razorpay.com/v1/orders", {
@@ -154,10 +169,9 @@ export const placeOrder = createServerFn({ method: "POST" })
         Authorization: `Basic ${btoa(`${keyId}:${keySecret}`)}`,
       },
       body: JSON.stringify({
-        amount: Math.round(Number(order.final_amount) * 100),
+        amount: Math.round(final * 100),
         currency: "INR",
-        receipt: order.order_number,
-        notes: { order_id: order.id },
+        notes: { purchase_link: link.id },
       }),
     });
     const rzpBody = await rzpRes.text();
@@ -167,86 +181,111 @@ export const placeOrder = createServerFn({ method: "POST" })
     }
     const rzpOrder = JSON.parse(rzpBody) as { id: string };
 
-    await supabaseAdmin.from("payments").insert({
-      order_id: order.id,
-      razorpay_order_id: rzpOrder.id,
-      amount: Number(order.final_amount),
-      payment_status: "created",
-    });
-
+    const payload = JSON.stringify({ draft, razorpayOrderId: rzpOrder.id });
     return {
-      orderId: order.id,
-      orderNumber: order.order_number,
-      amount: Number(order.final_amount),
       mode: "razorpay" as const,
+      amount: final,
       razorpayOrderId: rzpOrder.id,
       keyId,
+      draft: payload,
+      draftSignature: await signDraft(payload),
     };
   });
 
+async function bumpCoupon(couponId: string) {
+  const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+  const { data: c } = await supabaseAdmin.from("coupons").select("used_count").eq("id", couponId).single();
+  await supabaseAdmin
+    .from("coupons")
+    .update({ used_count: (c?.used_count ?? 0) + 1 })
+    .eq("id", couponId);
+}
+
 const verifySchema = z.object({
-  orderId: z.string().uuid(),
+  draft: z.string().min(10).max(4000),
+  draftSignature: z.string().min(10).max(300),
   razorpay_order_id: z.string().min(4).max(120),
   razorpay_payment_id: z.string().min(4).max(120),
   razorpay_signature: z.string().min(10).max(300),
 });
 
-/** Server-side HMAC signature verification — payment is only trusted here. */
+/** Server-side HMAC signature verification — the order is only created here. */
 export const verifyPayment = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => verifySchema.parse(data))
   .handler(async ({ data }) => {
     const keySecret = process.env["RAZORPAY_KEY_SECRET"];
     if (!keySecret) throw new Error("Payment gateway is not configured.");
     const { createHmac, timingSafeEqual } = await import("crypto");
+    const equal = (a: string, b: string) => {
+      const x = Buffer.from(a);
+      const y = Buffer.from(b);
+      return x.length === y.length && timingSafeEqual(x, y);
+    };
+
     const expected = createHmac("sha256", keySecret)
       .update(`${data.razorpay_order_id}|${data.razorpay_payment_id}`)
       .digest("hex");
-    const a = Buffer.from(expected);
-    const b = Buffer.from(data.razorpay_signature);
-    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+    if (!equal(expected, data.razorpay_signature)) throw new Error("Payment verification failed.");
+    if (!equal(await signDraft(data.draft), data.draftSignature)) {
       throw new Error("Payment verification failed.");
     }
 
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    const { data: order } = await supabaseAdmin
-      .from("orders")
-      .select("id, product_id, quantity, purchase_link_id, order_number")
-      .eq("id", data.orderId)
-      .maybeSingle();
-    if (!order) throw new Error("Order not found.");
+    const parsed = JSON.parse(data.draft) as { draft: OrderDraft; razorpayOrderId: string };
+    if (parsed.razorpayOrderId !== data.razorpay_order_id) throw new Error("Payment verification failed.");
 
-    await supabaseAdmin
-      .from("orders")
-      .update({ payment_status: "paid", order_status: "confirmed" })
-      .eq("id", order.id);
-    await supabaseAdmin
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    // Never create the same order twice if the customer retries verification.
+    const { data: existing } = await supabaseAdmin
       .from("payments")
-      .update({
-        payment_status: "paid",
-        razorpay_payment_id: data.razorpay_payment_id,
-      })
-      .eq("razorpay_order_id", data.razorpay_order_id);
+      .select("order_id")
+      .eq("razorpay_order_id", data.razorpay_order_id)
+      .maybeSingle();
+    if (existing?.order_id) {
+      const { data: prior } = await supabaseAdmin
+        .from("orders")
+        .select("order_number")
+        .eq("id", existing.order_id)
+        .maybeSingle();
+      if (prior) return { orderNumber: prior.order_number };
+    }
+
+    const { data: order, error } = await supabaseAdmin
+      .from("orders")
+      .insert({ ...parsed.draft, payment_status: "paid", order_status: "confirmed" })
+      .select("id, order_number")
+      .single();
+    if (error || !order) throw new Error(error?.message ?? "Could not create the order.");
+
+    await supabaseAdmin.from("payments").insert({
+      order_id: order.id,
+      razorpay_order_id: data.razorpay_order_id,
+      razorpay_payment_id: data.razorpay_payment_id,
+      amount: parsed.draft.final_amount,
+      payment_status: "paid",
+    });
+
+    if (parsed.draft.coupon_id) await bumpCoupon(parsed.draft.coupon_id);
 
     const { data: product } = await supabaseAdmin
       .from("products")
       .select("stock")
-      .eq("id", order.product_id)
+      .eq("id", parsed.draft.product_id)
       .maybeSingle();
     if (product) {
       await supabaseAdmin
         .from("products")
-        .update({ stock: Math.max(0, product.stock - order.quantity) })
-        .eq("id", order.product_id);
+        .update({ stock: Math.max(0, product.stock - parsed.draft.quantity) })
+        .eq("id", parsed.draft.product_id);
     }
-    if (order.purchase_link_id) {
-      await supabaseAdmin
-        .from("purchase_links")
-        .update({ status: "converted" })
-        .eq("id", order.purchase_link_id);
-    }
+    await supabaseAdmin
+      .from("purchase_links")
+      .update({ status: "converted" })
+      .eq("id", parsed.draft.purchase_link_id);
 
     return { orderNumber: order.order_number };
   });
+
 
 /** Public checkout payload for a purchase link (also counts the visit). */
 export const getCheckout = createServerFn({ method: "GET" })
