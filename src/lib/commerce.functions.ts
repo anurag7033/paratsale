@@ -97,7 +97,9 @@ export const placeOrder = createServerFn({ method: "POST" })
       couponId = coupon.id;
     }
 
-    const final = total - discount;
+    // Shipment charge is the amount the agent fixed on this purchase link.
+    const shipping = Math.max(0, Number(link.shipping_amount ?? 0));
+    const final = total - discount + shipping;
 
     await supabaseAdmin
       .from("customers")
