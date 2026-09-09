@@ -95,11 +95,12 @@ function ProductLinkPage() {
                   <button
                     key={src}
                     onClick={() => setActiveImage(i)}
-                    className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${
-                      i === activeImage ? "border-primary" : "border-transparent opacity-70"
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 bg-card p-1 ${
+                      i === activeImage ? "border-primary" : "border-border opacity-70"
                     }`}
                   >
-                    <img src={src} alt={`${product.name} view ${i + 1}`} className="h-full w-full object-cover" />
+                    <img src={src} alt={`${product.name} view ${i + 1}`} className="max-h-full max-w-full object-contain" />
+
                   </button>
                 ))}
               </div>
