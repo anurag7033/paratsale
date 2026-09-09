@@ -260,7 +260,7 @@ export const getCheckout = createServerFn({ method: "GET" })
       .maybeSingle();
     if (!link) return { found: false as const };
 
-    const [{ data: product }, { data: customer }, { data: agent }, { data: coupons }] = await Promise.all([
+    const [{ data: product }, { data: customer }, { data: agentRow }, { data: coupons }] = await Promise.all([
       supabaseAdmin
         .from("products")
         .select("id, name, slug, description, images, original_price, selling_price, category, stock, specifications, status")
@@ -271,12 +271,30 @@ export const getCheckout = createServerFn({ method: "GET" })
         .select("name, phone, email, address, city, state, pincode")
         .eq("id", link.customer_id)
         .maybeSingle(),
-      supabaseAdmin.from("profiles").select("name, phone").eq("id", link.agent_id).maybeSingle(),
+      supabaseAdmin
+        .from("profiles")
+        .select(
+          "name, phone, bpo_name, bpo_contact_person, bpo_address, bpo_city, bpo_state, bpo_pincode, admin_id",
+        )
+        .eq("id", link.agent_id)
+        .maybeSingle(),
       supabaseAdmin
         .from("coupons")
         .select("code, discount_type, discount_value, minimum_purchase, usage_limit, used_count, expiry_date, status")
         .eq("status", "active"),
     ]);
+
+    let agent = agentRow;
+    if (agentRow && !agentRow.bpo_name && agentRow.admin_id) {
+      const { data: adminProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("bpo_name, bpo_contact_person, bpo_address, bpo_city, bpo_state, bpo_pincode")
+        .eq("id", agentRow.admin_id)
+        .maybeSingle();
+      if (adminProfile) {
+        agent = { ...agentRow, ...adminProfile };
+      }
+    }
 
     await supabaseAdmin.from("purchase_links").update({ visits: link.visits + 1 }).eq("id", link.id);
 

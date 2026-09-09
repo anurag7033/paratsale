@@ -6,13 +6,16 @@ import { toast } from "sonner";
 import {
   ArrowLeft,
   BadgePercent,
+  Building2,
   CheckCircle2,
   Crosshair,
   Loader2,
   MapPin,
   PackageCheck,
+  Phone,
   ShieldCheck,
   Truck,
+  User,
 } from "lucide-react";
 import { getCheckout, placeOrder, verifyPayment } from "@/lib/commerce.functions";
 import { BrandLockup } from "@/components/brand";
@@ -454,10 +457,34 @@ function Checkout() {
 
           {data.agent && (
             <Card>
-              <CardContent className="p-5 text-sm">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Your agent</p>
-                <p className="mt-1 font-medium">{data.agent.name}</p>
-                {data.agent.phone && <p className="text-muted-foreground">{data.agent.phone}</p>}
+              <CardContent className="space-y-3 p-5 text-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Sold by</p>
+                <div className="space-y-2">
+                  <p className="inline-flex items-center gap-2 font-semibold">
+                    <Building2 className="h-4 w-4 text-primary" />
+                    {data.agent.bpo_name || data.agent.name}
+                  </p>
+                  {data.agent.bpo_contact_person && (
+                    <p className="inline-flex items-center gap-2 text-muted-foreground">
+                      <User className="h-4 w-4" /> {data.agent.bpo_contact_person}
+                    </p>
+                  )}
+                  {data.agent.phone && (
+                    <p className="inline-flex items-center gap-2 text-muted-foreground">
+                      <Phone className="h-4 w-4" /> {data.agent.phone}
+                    </p>
+                  )}
+                  {(data.agent.bpo_address || data.agent.bpo_city) && (
+                    <p className="inline-flex items-start gap-2 text-muted-foreground">
+                      <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
+                      <span>
+                        {[data.agent.bpo_address, data.agent.bpo_city, data.agent.bpo_state, data.agent.bpo_pincode]
+                          .filter(Boolean)
+                          .join(", ")}
+                      </span>
+                    </p>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
