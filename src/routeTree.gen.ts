@@ -19,6 +19,7 @@ import { Route as InvoiceOrderNumberRouteImport } from './routes/invoice.$orderN
 import { Route as OrderOrderNumberRouteImport } from './routes/order.$orderNumber'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as AuthenticatedAdminAdminsRouteImport } from './routes/_authenticated/admin.admins'
 import { Route as AuthenticatedAdminAgentsRouteImport } from './routes/_authenticated/admin.agents'
 import { Route as AuthenticatedAdminCouponsRouteImport } from './routes/_authenticated/admin.coupons'
 import { Route as AuthenticatedAdminCustomersRouteImport } from './routes/_authenticated/admin.customers'
@@ -81,6 +82,12 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminAdminsRoute =
+  AuthenticatedAdminAdminsRouteImport.update({
+    id: '/admins',
+    path: '/admins',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAdminAgentsRoute =
   AuthenticatedAdminAgentsRouteImport.update({
     id: '/agents',
@@ -159,6 +166,7 @@ export interface FileRoutesByFullPath {
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -180,6 +188,7 @@ export interface FileRoutesByTo {
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -205,6 +214,7 @@ export interface FileRoutesById {
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
+  '/_authenticated/admin/admins': typeof AuthenticatedAdminAdminsRoute
   '/_authenticated/admin/agents': typeof AuthenticatedAdminAgentsRoute
   '/_authenticated/admin/coupons': typeof AuthenticatedAdminCouponsRoute
   '/_authenticated/admin/customers': typeof AuthenticatedAdminCustomersRoute
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
+    | '/admin/admins'
     | '/admin/agents'
     | '/admin/coupons'
     | '/admin/customers'
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
+    | '/admin/admins'
     | '/admin/agents'
     | '/admin/coupons'
     | '/admin/customers'
@@ -275,6 +287,7 @@ export interface FileRouteTypes {
     | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
+    | '/_authenticated/admin/admins'
     | '/_authenticated/admin/agents'
     | '/_authenticated/admin/coupons'
     | '/_authenticated/admin/customers'
@@ -373,6 +386,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/admins': {
+      id: '/_authenticated/admin/admins'
+      path: '/admins'
+      fullPath: '/admin/admins'
+      preLoaderRoute: typeof AuthenticatedAdminAdminsRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/admin/agents': {
       id: '/_authenticated/admin/agents'
       path: '/agents'
@@ -461,6 +481,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AuthenticatedAdminRouteChildren {
+  AuthenticatedAdminAdminsRoute: typeof AuthenticatedAdminAdminsRoute
   AuthenticatedAdminAgentsRoute: typeof AuthenticatedAdminAgentsRoute
   AuthenticatedAdminCouponsRoute: typeof AuthenticatedAdminCouponsRoute
   AuthenticatedAdminCustomersRoute: typeof AuthenticatedAdminCustomersRoute
@@ -472,6 +493,7 @@ interface AuthenticatedAdminRouteChildren {
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
+  AuthenticatedAdminAdminsRoute: AuthenticatedAdminAdminsRoute,
   AuthenticatedAdminAgentsRoute: AuthenticatedAdminAgentsRoute,
   AuthenticatedAdminCouponsRoute: AuthenticatedAdminCouponsRoute,
   AuthenticatedAdminCustomersRoute: AuthenticatedAdminCustomersRoute,

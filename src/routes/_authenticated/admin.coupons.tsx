@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { inr, shortDate } from "@/lib/format";
+import { useAppSession } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/admin/coupons")({
   head: () => ({
@@ -43,6 +44,8 @@ function AdminCoupons() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(blank);
+  const { role } = useAppSession();
+  const canEdit = role === "super_admin";
 
   const { data: coupons } = useQuery({
     queryKey: ["coupons"],
@@ -99,12 +102,18 @@ function AdminCoupons() {
   return (
     <>
       <PageHeader
-        title="Coupon Manager"
-        description="Discounts are validated automatically at checkout: status, expiry, usage limit and minimum order."
+        title={canEdit ? "Voucher Codes" : "Available Vouchers"}
+        description={
+          canEdit
+            ? "Discounts are validated automatically at checkout: status, expiry, usage limit and minimum order."
+            : "Discount codes your agents can share. Only the super admin can create or change them."
+        }
         action={
-          <Button onClick={() => setOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New coupon
-          </Button>
+          canEdit ? (
+            <Button onClick={() => setOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New voucher
+            </Button>
+          ) : undefined
         }
       />
 
@@ -122,7 +131,7 @@ function AdminCoupons() {
                   <TableHead>Usage</TableHead>
                   <TableHead>Expires</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  {canEdit && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -141,16 +150,19 @@ function AdminCoupons() {
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={c.status === "active"}
+                          disabled={!canEdit}
                           onCheckedChange={(v) => update.mutate({ id: c.id, status: v ? "active" : "inactive" })}
                         />
                         <StatusDot active={c.status === "active"} />
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => remove.mutate(c.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+                    {canEdit && (
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => remove.mutate(c.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>

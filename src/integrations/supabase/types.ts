@@ -287,6 +287,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          admin_id: string | null
           created_at: string
           email: string
           id: string
@@ -295,6 +296,7 @@ export type Database = {
           status: string
         }
         Insert: {
+          admin_id?: string | null
           created_at?: string
           email?: string
           id: string
@@ -303,6 +305,7 @@ export type Database = {
           status?: string
         }
         Update: {
+          admin_id?: string | null
           created_at?: string
           email?: string
           id?: string
@@ -310,7 +313,15 @@ export type Database = {
           phone?: string | null
           status?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_admin_id_fkey"
+            columns: ["admin_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       purchase_links: {
         Row: {
@@ -390,6 +401,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      can_view_order: {
+        Args: { _order_id: string; _uid: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -397,9 +412,13 @@ export type Database = {
         }
         Returns: boolean
       }
+      manages_user: {
+        Args: { _admin: string; _user: string }
+        Returns: boolean
+      }
     }
     Enums: {
-      app_role: "admin" | "agent"
+      app_role: "admin" | "agent" | "super_admin"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -527,7 +546,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "agent"],
+      app_role: ["admin", "agent", "super_admin"],
     },
   },
 } as const

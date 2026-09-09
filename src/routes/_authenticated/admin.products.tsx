@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { inr, slugify } from "@/lib/format";
+import { useAppSession } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   head: () => ({
@@ -77,6 +78,8 @@ function AdminProducts() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<ProductForm>(blank);
   const [uploading, setUploading] = useState(false);
+  const { role } = useAppSession();
+  const canEdit = role === "super_admin";
 
   const imageList = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
 
@@ -184,14 +187,16 @@ function AdminProducts() {
         title="Products"
         description="Catalogue, pricing, stock and public product pages."
         action={
-          <Button
-            onClick={() => {
-              setForm(blank);
-              setOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" /> New product
-          </Button>
+          canEdit ? (
+            <Button
+              onClick={() => {
+                setForm(blank);
+                setOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> New product
+            </Button>
+          ) : undefined
         }
       />
 
@@ -240,6 +245,7 @@ function AdminProducts() {
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={p.status === "active"}
+                            disabled={!canEdit}
                             onCheckedChange={(v) =>
                               toggle.mutate({ id: p.id, status: v ? "active" : "inactive" })
                             }
@@ -254,36 +260,40 @@ function AdminProducts() {
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setForm({
-                                id: p.id,
-                                name: p.name,
-                                slug: p.slug,
-                                description: p.description,
-                                images: (p.images ?? []).join("\n"),
-                                original_price: String(p.original_price),
-                                selling_price: String(p.selling_price),
-                                category: p.category,
-                                stock: String(p.stock),
-                                specifications: specsToText(p.specifications),
-                                status: p.status,
-                              });
-                              setOpen(true);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => remove.mutate(p.id)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {canEdit && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setForm({
+                                    id: p.id,
+                                    name: p.name,
+                                    slug: p.slug,
+                                    description: p.description,
+                                    images: (p.images ?? []).join("\n"),
+                                    original_price: String(p.original_price),
+                                    selling_price: String(p.selling_price),
+                                    category: p.category,
+                                    stock: String(p.stock),
+                                    specifications: specsToText(p.specifications),
+                                    status: p.status,
+                                  });
+                                  setOpen(true);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => remove.mutate(p.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
