@@ -1,13 +1,17 @@
 import { useState, type ReactNode } from "react";
 import { Link, useNavigate, useRouterState } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { ChevronLeft, LogOut, Menu, ShieldCheck, X } from "lucide-react";
+import { useServerFn } from "@tanstack/react-start";
+import { ChevronLeft, Loader2, LogOut, MapPin, Menu, Search, ShieldCheck, Truck, X } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { BrandLockup } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
+import { lookupPincode, type PincodeResult } from "@/lib/shipping.functions";
+import { inr } from "@/lib/format";
 
 export type NavGroup = {
   label: string;
