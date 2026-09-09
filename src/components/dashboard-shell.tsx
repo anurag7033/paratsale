@@ -176,6 +176,7 @@ export function DashboardShell({
           {collapsed ? <BrandLockup subtitle="" /> : <BrandLockup />}
         </div>
         {nav}
+        {!collapsed && <SidebarShippingCalculator />}
         <div className="border-t border-sidebar-border p-3">
           <button
             onClick={() => setCollapsed((v) => !v)}
