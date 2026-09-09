@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
-import { IndianRupee, Link2, ShoppingCart, UserSquare2 } from "lucide-react";
+import { Link2, ShoppingCart, UserSquare2 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard-shell";
@@ -52,7 +52,6 @@ function AgentHome() {
   });
 
   const orders = data?.orders ?? [];
-  const revenue = orders.reduce((s, o) => s + Number(o.final_amount), 0);
   const paid = orders.filter((o) => o.payment_status === "paid");
 
   const byMonth = orders.reduce<Record<string, number>>((acc, o) => {
@@ -77,11 +76,10 @@ function AgentHome() {
       />
 
 
-      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         <StatCard label="My customers" value={String(data?.customers.length ?? 0)} icon={UserSquare2} />
         <StatCard label="Purchase links" value={String(data?.links.length ?? 0)} icon={Link2} />
         <StatCard label="My orders" value={String(orders.length)} icon={ShoppingCart} />
-        <StatCard label="Revenue generated" value={inr(revenue)} icon={IndianRupee} />
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-3">
