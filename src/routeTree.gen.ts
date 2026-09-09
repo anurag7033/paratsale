@@ -32,6 +32,7 @@ import { Route as AuthenticatedAgentCustomersRouteImport } from './routes/_authe
 import { Route as AuthenticatedAgentLinksRouteImport } from './routes/_authenticated/agent.links'
 import { Route as AuthenticatedAgentOrdersRouteImport } from './routes/_authenticated/agent.orders'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
+import { Route as BuyTokenIndexRouteImport } from './routes/buy.$token.index'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -156,13 +157,18 @@ const ApiPublicRazorpayWebhookRoute =
     path: '/api/public/razorpay-webhook',
     getParentRoute: () => rootRouteImport,
   } as any)
+const BuyTokenIndexRoute = BuyTokenIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => BuyTokenRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/agent': typeof AuthenticatedAgentRouteWithChildren
-  '/buy/$token': typeof BuyTokenRoute
+  '/buy/$token': typeof BuyTokenRouteWithChildren
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -180,11 +186,11 @@ export interface FileRoutesByFullPath {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/agent/': typeof AuthenticatedAgentIndexRoute
+  '/buy/$token/': typeof BuyTokenIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/auth': typeof AuthRoute
-  '/buy/$token': typeof BuyTokenRoute
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -202,6 +208,7 @@ export interface FileRoutesByTo {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/agent': typeof AuthenticatedAgentIndexRoute
+  '/buy/$token': typeof BuyTokenIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -210,7 +217,7 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/agent': typeof AuthenticatedAgentRouteWithChildren
-  '/buy/$token': typeof BuyTokenRoute
+  '/buy/$token': typeof BuyTokenRouteWithChildren
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -228,6 +235,7 @@ export interface FileRoutesById {
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/agent/': typeof AuthenticatedAgentIndexRoute
+  '/buy/$token/': typeof BuyTokenIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -254,11 +262,11 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/admin/'
     | '/agent/'
+    | '/buy/$token/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/auth'
-    | '/buy/$token'
     | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
@@ -276,6 +284,7 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/admin'
     | '/agent'
+    | '/buy/$token'
   id:
     | '__root__'
     | '/'
@@ -301,13 +310,14 @@ export interface FileRouteTypes {
     | '/api/public/razorpay-webhook'
     | '/_authenticated/admin/'
     | '/_authenticated/agent/'
+    | '/buy/$token/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  BuyTokenRoute: typeof BuyTokenRoute
+  BuyTokenRoute: typeof BuyTokenRouteWithChildren
   InvoiceOrderNumberRoute: typeof InvoiceOrderNumberRoute
   OrderOrderNumberRoute: typeof OrderOrderNumberRoute
   ProductSlugRoute: typeof ProductSlugRoute
@@ -477,6 +487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiPublicRazorpayWebhookRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/buy/$token/': {
+      id: '/buy/$token/'
+      path: '/'
+      fullPath: '/buy/$token/'
+      preLoaderRoute: typeof BuyTokenIndexRouteImport
+      parentRoute: typeof BuyTokenRoute
+    }
   }
 }
 
@@ -537,11 +554,23 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface BuyTokenRouteChildren {
+  BuyTokenIndexRoute: typeof BuyTokenIndexRoute
+}
+
+const BuyTokenRouteChildren: BuyTokenRouteChildren = {
+  BuyTokenIndexRoute: BuyTokenIndexRoute,
+}
+
+const BuyTokenRouteWithChildren = BuyTokenRoute._addFileChildren(
+  BuyTokenRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  BuyTokenRoute: BuyTokenRoute,
+  BuyTokenRoute: BuyTokenRouteWithChildren,
   InvoiceOrderNumberRoute: InvoiceOrderNumberRoute,
   OrderOrderNumberRoute: OrderOrderNumberRoute,
   ProductSlugRoute: ProductSlugRoute,
