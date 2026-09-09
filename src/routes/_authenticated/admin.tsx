@@ -7,6 +7,7 @@ import {
   ShieldCheck,
   ShoppingCart,
   TrendingUp,
+  Truck,
   Users,
   UserSquare2,
 } from "lucide-react";
@@ -40,7 +41,10 @@ function navFor(isSuper: boolean): NavGroup[] {
     },
     {
       label: "Operations",
-      items: [{ title: "Orders", to: "/admin/orders", icon: ShoppingCart }],
+      items: [
+        { title: "Orders", to: "/admin/orders", icon: ShoppingCart },
+        { title: "Shipment Charges", to: "/admin/shipping", icon: Truck },
+      ],
     },
   ];
   return groups;
