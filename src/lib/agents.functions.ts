@@ -13,6 +13,13 @@ async function roleOf(supabase: any, userId: string): Promise<Role | null> {
   return roles.sort((a, b) => RANK[b] - RANK[a])[0]!;
 }
 
+function friendly(message: string) {
+  if (/already been registered|already exists/i.test(message))
+    return "That email address already has an account. Use a different email.";
+  if (/password/i.test(message)) return "That password was rejected — try a longer one.";
+  return message;
+}
+
 async function assertSuperAdmin(supabase: any, userId: string) {
   if ((await roleOf(supabase, userId)) !== "super_admin") throw new Error("Only a super admin can do this.");
 }
@@ -43,8 +50,8 @@ export const createAgent = createServerFn({ method: "POST" })
         admin_id: role === "admin" ? context.userId : null,
       },
     });
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    if (error) return { ok: false as const, error: friendly(error.message) };
+    return { ok: true as const, error: null };
   });
 
 const bpoSchema = accountSchema.extend({
@@ -78,8 +85,8 @@ export const createAdmin = createServerFn({ method: "POST" })
         bpo_pincode: data.bpo_pincode,
       },
     });
-    if (error) throw new Error(error.message);
-    return { ok: true };
+    if (error) return { ok: false as const, error: friendly(error.message) };
+    return { ok: true as const, error: null };
   });
 
 export const deleteAgent = createServerFn({ method: "POST" })

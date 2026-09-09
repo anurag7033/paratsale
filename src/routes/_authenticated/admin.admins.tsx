@@ -81,7 +81,7 @@ function SuperAdmins() {
       if (phone.replace(/\D/g, "").length < 6) throw new Error("Please enter a valid mobile number.");
       if (form.password.length < 8) throw new Error("The temporary password needs at least 8 characters.");
       if (form.bpo_name.trim().length < 2) throw new Error("Please enter the BPO (calling agency) name.");
-      return create({
+      const res = await create({
         data: {
           name,
           email,
@@ -95,6 +95,8 @@ function SuperAdmins() {
           bpo_pincode: form.bpo_pincode.trim(),
         },
       });
+      if (!res.ok) throw new Error(res.error);
+      return res;
     },
     onSuccess: () => {
       toast.success("BPO account created — the admin can sign in immediately.");
