@@ -102,12 +102,18 @@ function AdminCoupons() {
   return (
     <>
       <PageHeader
-        title="Coupon Manager"
-        description="Discounts are validated automatically at checkout: status, expiry, usage limit and minimum order."
+        title={canEdit ? "Voucher Codes" : "Available Vouchers"}
+        description={
+          canEdit
+            ? "Discounts are validated automatically at checkout: status, expiry, usage limit and minimum order."
+            : "Discount codes your agents can share. Only the super admin can create or change them."
+        }
         action={
-          <Button onClick={() => setOpen(true)}>
-            <Plus className="mr-2 h-4 w-4" /> New coupon
-          </Button>
+          canEdit ? (
+            <Button onClick={() => setOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New voucher
+            </Button>
+          ) : undefined
         }
       />
 
