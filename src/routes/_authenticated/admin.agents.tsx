@@ -43,12 +43,13 @@ export type AgentRow = {
   revenue: number;
   pending: number;
   completed: number;
+  bpo_name: string | null;
 };
 
 export async function loadAgentRows(): Promise<AgentRow[]> {
   const [{ data: roles }, { data: profiles }, { data: customers }, { data: orders }] = await Promise.all([
     supabase.from("user_roles").select("user_id").eq("role", "agent"),
-    supabase.from("profiles").select("id,name,email,phone,status,created_at"),
+    supabase.from("profiles").select("id,name,email,phone,status,created_at,admin_id,bpo_name"),
     supabase.from("customers").select("id,agent_id"),
     supabase.from("orders").select("id,agent_id,final_amount,payment_status,order_status"),
   ]);
@@ -57,6 +58,7 @@ export async function loadAgentRows(): Promise<AgentRow[]> {
     .filter((p) => agentIds.has(p.id))
     .map((p) => {
       const own = (orders ?? []).filter((o) => o.agent_id === p.id);
+      const owner = (profiles ?? []).find((x) => x.id === p.admin_id);
       return {
         id: p.id,
         name: p.name,
@@ -64,6 +66,7 @@ export async function loadAgentRows(): Promise<AgentRow[]> {
         phone: p.phone,
         status: p.status,
         created_at: p.created_at,
+        bpo_name: owner?.bpo_name ?? p.bpo_name ?? null,
         customers: (customers ?? []).filter((c) => c.agent_id === p.id).length,
         orders: own.length,
         revenue: own.reduce((s, o) => s + Number(o.final_amount), 0),
@@ -125,7 +128,7 @@ function AdminAgents() {
   });
 
   const filtered = (agents ?? []).filter((a) =>
-    `${a.name} ${a.email} ${a.phone ?? ""}`.toLowerCase().includes(search.toLowerCase()),
+    `${a.name} ${a.email} ${a.phone ?? ""} ${a.bpo_name ?? ""}`.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -144,7 +147,7 @@ function AdminAgents() {
         <CardContent className="p-4">
           <Input
             className="max-w-sm"
-            placeholder="Search agents by name, email or phone…"
+            placeholder="Search agents by name, email, phone or BPO…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
           />
@@ -157,6 +160,7 @@ function AdminAgents() {
                   <TableRow>
                     <TableHead>Agent</TableHead>
                     <TableHead>Agent ID</TableHead>
+                    <TableHead>BPO</TableHead>
                     <TableHead>Phone</TableHead>
                     <TableHead>Customers</TableHead>
                     <TableHead>Orders</TableHead>
@@ -173,6 +177,7 @@ function AdminAgents() {
                         <p className="text-xs text-muted-foreground">{a.email}</p>
                       </TableCell>
                       <TableCell className="font-mono text-xs">AGT-{a.id.slice(0, 6).toUpperCase()}</TableCell>
+                      <TableCell>{a.bpo_name || "—"}</TableCell>
                       <TableCell>{a.phone ?? "—"}</TableCell>
                       <TableCell>{a.customers}</TableCell>
                       <TableCell>{a.orders}</TableCell>

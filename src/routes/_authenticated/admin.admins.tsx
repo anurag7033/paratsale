@@ -33,7 +33,18 @@ export const Route = createFileRoute("/_authenticated/admin/admins")({
   component: SuperAdmins,
 });
 
-const blank = { name: "", email: "", phone: "", password: "" };
+const blank = {
+  name: "",
+  email: "",
+  phone: "",
+  password: "",
+  bpo_name: "",
+  bpo_contact_person: "",
+  bpo_address: "",
+  bpo_city: "",
+  bpo_state: "",
+  bpo_pincode: "",
+};
 
 function SuperAdmins() {
   const qc = useQueryClient();
@@ -47,7 +58,7 @@ function SuperAdmins() {
     queryFn: async () => {
       const [{ data: roles }, { data: profiles }] = await Promise.all([
         supabase.from("user_roles").select("user_id,role"),
-        supabase.from("profiles").select("id,name,email,phone,status,created_at,admin_id"),
+        supabase.from("profiles").select("id,name,email,phone,status,created_at,admin_id,bpo_name,bpo_city,bpo_state"),
       ]);
       const adminIds = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
       return (profiles ?? [])
@@ -69,10 +80,24 @@ function SuperAdmins() {
         throw new Error("Please enter a valid email address, like name@company.com.");
       if (phone.replace(/\D/g, "").length < 6) throw new Error("Please enter a valid mobile number.");
       if (form.password.length < 8) throw new Error("The temporary password needs at least 8 characters.");
-      return create({ data: { name, email, phone, password: form.password } });
+      if (form.bpo_name.trim().length < 2) throw new Error("Please enter the BPO (calling agency) name.");
+      return create({
+        data: {
+          name,
+          email,
+          phone,
+          password: form.password,
+          bpo_name: form.bpo_name.trim(),
+          bpo_contact_person: form.bpo_contact_person.trim(),
+          bpo_address: form.bpo_address.trim(),
+          bpo_city: form.bpo_city.trim(),
+          bpo_state: form.bpo_state.trim(),
+          bpo_pincode: form.bpo_pincode.trim(),
+        },
+      });
     },
     onSuccess: () => {
-      toast.success("Admin created — they can sign in immediately.");
+      toast.success("BPO account created — the admin can sign in immediately.");
       setOpen(false);
       setForm(blank);
       void qc.invalidateQueries({ queryKey: ["admins"] });
@@ -119,6 +144,7 @@ function SuperAdmins() {
               <TableHeader>
                 <TableRow>
                   <TableHead>Admin</TableHead>
+                  <TableHead>BPO</TableHead>
                   <TableHead>Phone</TableHead>
                   <TableHead>Agents</TableHead>
                   <TableHead>Added</TableHead>
@@ -132,6 +158,12 @@ function SuperAdmins() {
                     <TableCell>
                       <p className="font-medium">{a.name || "Unnamed"}</p>
                       <p className="text-xs text-muted-foreground">{a.email}</p>
+                    </TableCell>
+                    <TableCell>
+                      <p className="font-medium">{a.bpo_name || "—"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {[a.bpo_city, a.bpo_state].filter(Boolean).join(", ") || "Location not set"}
+                      </p>
                     </TableCell>
                     <TableCell>{a.phone ?? "—"}</TableCell>
                     <TableCell>{a.agents}</TableCell>
@@ -166,11 +198,44 @@ function SuperAdmins() {
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Create admin</DialogTitle>
+            <DialogTitle>Create BPO account</DialogTitle>
           </DialogHeader>
-          <div className="space-y-4">
+          <div className="max-h-[65vh] space-y-4 overflow-y-auto pr-1">
             <div className="space-y-2">
-              <Label>Admin name</Label>
+              <Label>BPO (calling agency) name</Label>
+              <Input
+                value={form.bpo_name}
+                placeholder="e.g. Skyline Teleservices"
+                onChange={(e) => setForm({ ...form, bpo_name: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Contact person (optional)</Label>
+              <Input
+                value={form.bpo_contact_person}
+                onChange={(e) => setForm({ ...form, bpo_contact_person: e.target.value })}
+              />
+            </div>
+            <div className="space-y-2">
+              <Label>Office address</Label>
+              <Input value={form.bpo_address} onChange={(e) => setForm({ ...form, bpo_address: e.target.value })} />
+            </div>
+            <div className="grid gap-4 sm:grid-cols-3">
+              <div className="space-y-2">
+                <Label>City</Label>
+                <Input value={form.bpo_city} onChange={(e) => setForm({ ...form, bpo_city: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>State</Label>
+                <Input value={form.bpo_state} onChange={(e) => setForm({ ...form, bpo_state: e.target.value })} />
+              </div>
+              <div className="space-y-2">
+                <Label>Pincode</Label>
+                <Input value={form.bpo_pincode} onChange={(e) => setForm({ ...form, bpo_pincode: e.target.value })} />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Admin name (login owner)</Label>
               <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
             </div>
             <div className="space-y-2">
@@ -191,7 +256,7 @@ function SuperAdmins() {
               Cancel
             </Button>
             <Button onClick={() => addAdmin.mutate()} disabled={addAdmin.isPending}>
-              Create admin
+              Create BPO account
             </Button>
           </DialogFooter>
         </DialogContent>
