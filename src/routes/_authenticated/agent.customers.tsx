@@ -228,41 +228,141 @@ function AgentCustomers() {
         </CardContent>
       </Card>
 
-      <Dialog open={open} onOpenChange={setOpen}>
+      <Dialog
+        open={open}
+        onOpenChange={(v) => {
+          setOpen(v);
+          if (!v) setCreatedLink(null);
+        }}
+      >
         <DialogContent className="max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>{form.id ? "Edit customer" : "Add customer"}</DialogTitle>
+            <DialogTitle>
+              {createdLink ? "Payment link ready" : form.id ? "Edit customer" : "Add customer"}
+            </DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4">
-            <div className="space-y-2">
-              <Label>Customer name</Label>
-              <Input
-                value={form.name}
-                placeholder="e.g. Ramesh Gupta"
-                onChange={(e) => setForm({ ...form, name: e.target.value })}
-              />
+          {createdLink ? (
+            <div className="space-y-3">
+              <p className="text-sm text-muted-foreground">
+                Share this link with the customer. It opens their product page and checkout.
+              </p>
+              <div className="flex gap-2">
+                <Input readOnly value={createdLink} className="font-mono text-xs" />
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    void navigator.clipboard.writeText(createdLink);
+                    toast.success("Payment link copied");
+                  }}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
+              </div>
+              <DialogFooter>
+                <Button asChild variant="outline">
+                  <a href={createdLink} target="_blank" rel="noreferrer">
+                    Open link
+                  </a>
+                </Button>
+                <Button
+                  onClick={() => {
+                    setCreatedLink(null);
+                    setOpen(false);
+                  }}
+                >
+                  Done
+                </Button>
+              </DialogFooter>
             </div>
-            <div className="space-y-2">
-              <Label>Mobile number</Label>
-              <Input
-                value={form.phone}
-                placeholder="e.g. +91 98765 43210"
-                onChange={(e) => setForm({ ...form, phone: e.target.value })}
-              />
-            </div>
-            <p className="text-xs text-muted-foreground">
-              That's all you need. The customer fills in their delivery address while placing the order.
-            </p>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={() => save.mutate()} disabled={save.isPending}>
-              Save customer
-            </Button>
-          </DialogFooter>
+          ) : (
+            <>
+              <div className="grid gap-4">
+                <div className="space-y-2">
+                  <Label>Customer name</Label>
+                  <Input
+                    value={form.name}
+                    placeholder="e.g. Ramesh Gupta"
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Mobile number</Label>
+                  <Input
+                    value={form.phone}
+                    placeholder="e.g. +91 98765 43210"
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                  />
+                </div>
+                {!form.id && (
+                  <div className="space-y-3 rounded-lg border p-3">
+                    <div className="space-y-2">
+                      <Label>Payment link product (optional)</Label>
+                      <Select value={productId} onValueChange={setProductId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a product to generate a payment link" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(products ?? []).map((p) => (
+                            <SelectItem key={p.id} value={p.id}>
+                              {p.name} · {inr(Number(p.selling_price))}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    {productId && (
+                      <div className="space-y-2">
+                        <Label>Shipment charge</Label>
+                        <p className="text-xs text-muted-foreground">
+                          Check the delivery pincode, then pick a charge. It is added to the customer's total.
+                        </p>
+                        <Input
+                          className="h-9 max-w-[10rem]"
+                          inputMode="numeric"
+                          placeholder="Delivery pincode"
+                          value={pincode}
+                          onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+                        />
+                        <ShippingCalculator
+                          compact
+                          selectedAmount={shipping}
+                          initialPincode={pincode}
+                          onPick={(amount) => setShipping(amount)}
+                        />
+                        <div className="flex items-center gap-2 pt-1">
+                          <span className="text-xs text-muted-foreground">Or set your own</span>
+                          <Input
+                            className="h-8 w-28"
+                            inputMode="numeric"
+                            value={shipping}
+                            onChange={(e) =>
+                              setShipping(Math.max(0, Number(e.target.value.replace(/\D/g, "")) || 0))
+                            }
+                          />
+                          <span className="text-xs font-medium">
+                            Applied: {shipping > 0 ? inr(shipping) : "Free"}
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                )}
+                <p className="text-xs text-muted-foreground">
+                  The customer fills in their delivery address while placing the order.
+                </p>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={() => save.mutate()} disabled={save.isPending}>
+                  {!form.id && productId ? "Save & create link" : "Save customer"}
+                </Button>
+              </DialogFooter>
+            </>
+          )}
         </DialogContent>
+
       </Dialog>
     </>
   );
