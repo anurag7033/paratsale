@@ -48,11 +48,27 @@ function AgentCustomers() {
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<Form>(blank);
+  const [productId, setProductId] = useState("");
+  const [pincode, setPincode] = useState("");
+  const [shipping, setShipping] = useState(0);
+  const [createdLink, setCreatedLink] = useState<string | null>(null);
 
   const { data: customers } = useQuery({
     queryKey: ["agent-customers"],
     queryFn: async () => {
       const { data, error } = await supabase.from("customers").select("*").order("created_at", { ascending: false });
+      if (error) throw error;
+      return data;
+    },
+  });
+
+  const { data: products } = useQuery({
+    queryKey: ["agent-products-active"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("products")
+        .select("id,name,selling_price,status")
+        .eq("status", "active");
       if (error) throw error;
       return data;
     },
@@ -66,20 +82,42 @@ function AgentCustomers() {
         phone: form.phone.trim(),
         agent_id: session!.user.id,
       };
-      const query = form.id
-        ? supabase.from("customers").update(payload).eq("id", form.id)
-        : supabase.from("customers").insert(payload);
-      const { error } = await query;
+      if (form.id) {
+        const { error } = await supabase.from("customers").update(payload).eq("id", form.id);
+        if (error) throw error;
+        return null;
+      }
+      const { data: inserted, error } = await supabase.from("customers").insert(payload).select("id").single();
       if (error) throw error;
+      if (!productId) return null;
+      const token = newToken();
+      const { error: linkError } = await supabase.from("purchase_links").insert({
+        agent_id: session!.user.id,
+        customer_id: inserted.id,
+        product_id: productId,
+        unique_token: token,
+        shipping_amount: shipping,
+      });
+      if (linkError) throw linkError;
+      return token;
     },
-    onSuccess: () => {
-      toast.success("Customer saved");
-      setOpen(false);
-      setForm(blank);
+    onSuccess: (token) => {
+      toast.success(token ? "Customer saved and payment link created" : "Customer saved");
       void qc.invalidateQueries({ queryKey: ["agent-customers"] });
+      void qc.invalidateQueries({ queryKey: ["agent-links"] });
+      if (token) {
+        setCreatedLink(`${window.location.origin}/buy/${token}`);
+      } else {
+        setOpen(false);
+      }
+      setForm(blank);
+      setProductId("");
+      setPincode("");
+      setShipping(0);
     },
     onError: (e: Error) => toast.error(e.message),
   });
+
 
   const remove = useMutation({
     mutationFn: async (id: string) => {
