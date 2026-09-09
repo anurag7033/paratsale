@@ -4,6 +4,7 @@ import { IndianRupee, Link2, ShoppingCart, UserSquare2 } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard-shell";
+import { ShippingCalculator } from "@/components/shipping-calculator";
 import { StatCard, EmptyState } from "@/components/stat-card";
 import { OrderStatusBadge, PaymentBadge } from "@/components/order-badges";
 import { Button } from "@/components/ui/button";
@@ -74,6 +75,8 @@ function AgentHome() {
           </Button>
         }
       />
+
+      <ShippingCalculator />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         <StatCard label="My customers" value={String(data?.customers.length ?? 0)} icon={UserSquare2} />
