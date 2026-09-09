@@ -288,6 +288,12 @@ export type Database = {
       profiles: {
         Row: {
           admin_id: string | null
+          bpo_address: string | null
+          bpo_city: string | null
+          bpo_contact_person: string | null
+          bpo_name: string | null
+          bpo_pincode: string | null
+          bpo_state: string | null
           created_at: string
           email: string
           id: string
@@ -297,6 +303,12 @@ export type Database = {
         }
         Insert: {
           admin_id?: string | null
+          bpo_address?: string | null
+          bpo_city?: string | null
+          bpo_contact_person?: string | null
+          bpo_name?: string | null
+          bpo_pincode?: string | null
+          bpo_state?: string | null
           created_at?: string
           email?: string
           id: string
@@ -306,6 +318,12 @@ export type Database = {
         }
         Update: {
           admin_id?: string | null
+          bpo_address?: string | null
+          bpo_city?: string | null
+          bpo_contact_person?: string | null
+          bpo_name?: string | null
+          bpo_pincode?: string | null
+          bpo_state?: string | null
           created_at?: string
           email?: string
           id?: string
