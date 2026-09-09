@@ -1,9 +1,10 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useState } from "react";
 import { toast } from "sonner";
 import {
+  ArrowLeft,
   BadgePercent,
   CheckCircle2,
   Crosshair,
@@ -11,7 +12,6 @@ import {
   MapPin,
   PackageCheck,
   ShieldCheck,
-  Star,
   Truck,
 } from "lucide-react";
 import { getCheckout, placeOrder, verifyPayment } from "@/lib/commerce.functions";
@@ -32,14 +32,17 @@ const checkoutQuery = (token: string) =>
     staleTime: 0,
   });
 
-export const Route = createFileRoute("/buy/$token")({
+export const Route = createFileRoute("/buy/$token/checkout")({
   loader: ({ params, context }) => context.queryClient.ensureQueryData(checkoutQuery(params.token)),
   head: () => ({
     meta: [
       { title: "Secure Checkout | Parat Haben Systems" },
-      { name: "description", content: "Complete your Parat Haben Systems order with online payment or cash on delivery." },
+      {
+        name: "description",
+        content: "Complete your Parat Haben Systems order with online payment or cash on delivery.",
+      },
       { property: "og:title", content: "Secure Checkout | Parat Haben Systems" },
-      { property: "og:description", content: "Personal checkout link with your delivery details pre-filled." },
+      { property: "og:description", content: "Personal checkout with your delivery details pre-filled." },
       { name: "robots", content: "noindex" },
     ],
   }),
@@ -86,7 +89,6 @@ function Checkout() {
   const [applied, setApplied] = useState<{ code: string; discount: number } | null>(null);
   const [method, setMethod] = useState("razorpay");
   const [busy, setBusy] = useState(false);
-  const [activeImage, setActiveImage] = useState(0);
   const [locating, setLocating] = useState(false);
   const [coords, setCoords] = useState<{ lat: number; lng: number; accuracy: number } | null>(null);
 
@@ -104,9 +106,6 @@ function Checkout() {
   }
 
   const images = ((product.images as string[] | null) ?? []).filter(Boolean);
-  const specs = Object.entries((product.specifications ?? {}) as Record<string, unknown>).filter(
-    ([, v]) => v !== null && v !== "" && typeof v !== "object",
-  );
   const subtotal = Number(product.selling_price) * quantity;
   const listTotal = Number(product.original_price || product.selling_price) * quantity;
   const savingsOnList = Math.max(0, listTotal - subtotal);
@@ -255,92 +254,15 @@ function Checkout() {
         </div>
       </header>
 
-      <section className="border-b bg-gradient-to-br from-primary/10 via-background to-background">
-        <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-2 lg:items-center">
-          <div className="space-y-4">
-            <div className="aspect-[4/3] overflow-hidden rounded-2xl border bg-muted shadow-[var(--shadow-card)]">
-              {images[activeImage] ? (
-                <img src={images[activeImage]} alt={product.name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full items-center justify-center">
-                  <PackageCheck className="h-12 w-12 text-muted-foreground" />
-                </div>
-              )}
-            </div>
-            {images.length > 1 && (
-              <div className="flex gap-3">
-                {images.slice(0, 5).map((src, i) => (
-                  <button
-                    key={src}
-                    onClick={() => setActiveImage(i)}
-                    className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${
-                      i === activeImage ? "border-primary" : "border-transparent opacity-70"
-                    }`}
-                  >
-                    <img src={src} alt={`${product.name} view ${i + 1}`} className="h-full w-full object-cover" />
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
+      <div className="mx-auto max-w-6xl px-4 pt-6">
+        <Button variant="ghost" size="sm" asChild>
+          <Link to="/buy/$token" params={{ token }}>
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to product details
+          </Link>
+        </Button>
+      </div>
 
-          <div className="space-y-5">
-            <Badge variant="secondary">{product.category}</Badge>
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl">{product.name}</h1>
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <span className="inline-flex text-amber-500">
-                {[0, 1, 2, 3, 4].map((i) => (
-                  <Star key={i} className="h-4 w-4 fill-current" />
-                ))}
-              </span>
-              Trusted by customers across India
-            </div>
-            <div className="flex flex-wrap items-end gap-3">
-              <span className="text-3xl font-bold">{inr(product.selling_price)}</span>
-              {Number(product.original_price) > Number(product.selling_price) && (
-                <>
-                  <span className="text-lg text-muted-foreground line-through">{inr(product.original_price)}</span>
-                  <Badge className="bg-emerald-600 text-white hover:bg-emerald-600">
-                    Save {inr(Number(product.original_price) - Number(product.selling_price))}
-                  </Badge>
-                </>
-              )}
-            </div>
-            <p className="whitespace-pre-line text-muted-foreground">{product.description}</p>
-            <div className="grid gap-2 sm:grid-cols-2">
-              {[
-                { icon: Truck, text: "Dispatched within 2 working days" },
-                { icon: ShieldCheck, text: "Genuine product warranty" },
-                { icon: CheckCircle2, text: `${product.stock} units in stock` },
-                { icon: BadgePercent, text: "Coupon discounts supported" },
-              ].map(({ icon: Icon, text }) => (
-                <p key={text} className="inline-flex items-center gap-2 text-sm">
-                  <Icon className="h-4 w-4 text-primary" /> {text}
-                </p>
-              ))}
-            </div>
-            <Button size="lg" className="w-full sm:w-auto" asChild>
-              <a href="#buy">Buy now — {inr(product.selling_price)}</a>
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {specs.length > 0 && (
-        <section className="mx-auto max-w-6xl px-4 py-10">
-          <h2 className="text-xl font-semibold">Specifications</h2>
-          <div className="mt-4 grid gap-x-8 gap-y-3 rounded-xl border bg-card p-6 sm:grid-cols-2">
-            {specs.map(([key, value]) => (
-              <div key={key} className="flex justify-between gap-4 border-b border-dashed py-2 text-sm last:border-0">
-                <span className="text-muted-foreground capitalize">{key.replace(/_/g, " ")}</span>
-                <span className="text-right font-medium">{String(value)}</span>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <main id="buy" className="mx-auto grid max-w-6xl gap-6 px-4 pb-16 pt-4 lg:grid-cols-[1.2fr_1fr]">
+      <main className="mx-auto grid max-w-6xl gap-6 px-4 pb-16 pt-4 lg:grid-cols-[1.2fr_1fr]">
         <div className="space-y-6">
           <Card className="shadow-[var(--shadow-card)]">
             <CardHeader>
