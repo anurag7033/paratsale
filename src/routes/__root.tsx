@@ -120,7 +120,17 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
-  const isLoading = useRouterState({ select: (s) => s.isLoading || s.status === "pending" });
+  const routerBusy = useRouterState({ select: (s) => s.isLoading || s.isTransitioning });
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!routerBusy) {
+      setIsLoading(false);
+      return;
+    }
+    const timer = setTimeout(() => setIsLoading(true), 150);
+    return () => clearTimeout(timer);
+  }, [routerBusy]);
 
   return (
     <QueryClientProvider client={queryClient}>
