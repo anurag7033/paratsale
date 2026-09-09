@@ -38,6 +38,7 @@ const blank = {
   email: "",
   phone: "",
   password: "",
+  commission_per_device: "",
   bpo_name: "",
   bpo_contact_person: "",
   bpo_address: "",
@@ -58,7 +59,11 @@ function SuperAdmins() {
     queryFn: async () => {
       const [{ data: roles }, { data: profiles }] = await Promise.all([
         supabase.from("user_roles").select("user_id,role"),
-        supabase.from("profiles").select("id,name,email,phone,status,created_at,admin_id,bpo_name,bpo_city,bpo_state"),
+        supabase
+          .from("profiles")
+          .select(
+            "id,name,email,phone,status,created_at,admin_id,bpo_name,bpo_city,bpo_state,commission_per_device",
+          ),
       ]);
       const adminIds = new Set((roles ?? []).filter((r) => r.role === "admin").map((r) => r.user_id));
       return (profiles ?? [])
