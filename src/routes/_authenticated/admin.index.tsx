@@ -14,7 +14,7 @@ import {
 import { IndianRupee, Package, ShoppingCart, TrendingUp, Users, UserSquare2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard-shell";
-import { ShippingCalculator } from "@/components/shipping-calculator";
+
 import { EmptyState, StatCard } from "@/components/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -106,7 +106,6 @@ function AdminHome() {
         action={<Badge variant="outline">Live data</Badge>}
       />
 
-      <ShippingCalculator />
 
       <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-5">
         <StatCard label="Total Products" value={data?.products ?? 0} icon={Package} loading={isLoading} />

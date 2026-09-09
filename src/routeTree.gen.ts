@@ -26,10 +26,12 @@ import { Route as AuthenticatedAdminOrdersRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminPagesRouteImport } from './routes/_authenticated/admin.pages'
 import { Route as AuthenticatedAdminProductsRouteImport } from './routes/_authenticated/admin.products'
 import { Route as AuthenticatedAdminSalesRouteImport } from './routes/_authenticated/admin.sales'
+import { Route as AuthenticatedAdminShippingRouteImport } from './routes/_authenticated/admin.shipping'
 import { Route as AuthenticatedAgentIndexRouteImport } from './routes/_authenticated/agent.index'
 import { Route as AuthenticatedAgentCustomersRouteImport } from './routes/_authenticated/agent.customers'
 import { Route as AuthenticatedAgentLinksRouteImport } from './routes/_authenticated/agent.links'
 import { Route as AuthenticatedAgentOrdersRouteImport } from './routes/_authenticated/agent.orders'
+import { Route as AuthenticatedAgentShippingRouteImport } from './routes/_authenticated/agent.shipping'
 import { Route as ApiPublicRazorpayWebhookRouteImport } from './routes/api/public/razorpay-webhook'
 import { Route as BuyTokenIndexRouteImport } from './routes/buy.$token.index'
 import { Route as BuyTokenCheckoutRouteImport } from './routes/buy.$token.checkout'
@@ -124,6 +126,12 @@ const AuthenticatedAdminSalesRoute = AuthenticatedAdminSalesRouteImport.update({
   path: '/sales',
   getParentRoute: () => AuthenticatedAdminRoute,
 } as any)
+const AuthenticatedAdminShippingRoute =
+  AuthenticatedAdminShippingRouteImport.update({
+    id: '/shipping',
+    path: '/shipping',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 const AuthenticatedAgentIndexRoute = AuthenticatedAgentIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -144,6 +152,12 @@ const AuthenticatedAgentOrdersRoute =
   AuthenticatedAgentOrdersRouteImport.update({
     id: '/orders',
     path: '/orders',
+    getParentRoute: () => AuthenticatedAgentRoute,
+  } as any)
+const AuthenticatedAgentShippingRoute =
+  AuthenticatedAgentShippingRouteImport.update({
+    id: '/shipping',
+    path: '/shipping',
     getParentRoute: () => AuthenticatedAgentRoute,
   } as any)
 const ApiPublicRazorpayWebhookRoute =
@@ -179,9 +193,11 @@ export interface FileRoutesByFullPath {
   '/admin/pages': typeof AuthenticatedAdminPagesRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/sales': typeof AuthenticatedAdminSalesRoute
+  '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/agent/customers': typeof AuthenticatedAgentCustomersRoute
   '/agent/links': typeof AuthenticatedAgentLinksRoute
   '/agent/orders': typeof AuthenticatedAgentOrdersRoute
+  '/agent/shipping': typeof AuthenticatedAgentShippingRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/buy/$token/checkout': typeof BuyTokenCheckoutRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
@@ -202,9 +218,11 @@ export interface FileRoutesByTo {
   '/admin/pages': typeof AuthenticatedAdminPagesRoute
   '/admin/products': typeof AuthenticatedAdminProductsRoute
   '/admin/sales': typeof AuthenticatedAdminSalesRoute
+  '/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/agent/customers': typeof AuthenticatedAgentCustomersRoute
   '/agent/links': typeof AuthenticatedAgentLinksRoute
   '/agent/orders': typeof AuthenticatedAgentOrdersRoute
+  '/agent/shipping': typeof AuthenticatedAgentShippingRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/buy/$token/checkout': typeof BuyTokenCheckoutRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
@@ -229,9 +247,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/pages': typeof AuthenticatedAdminPagesRoute
   '/_authenticated/admin/products': typeof AuthenticatedAdminProductsRoute
   '/_authenticated/admin/sales': typeof AuthenticatedAdminSalesRoute
+  '/_authenticated/admin/shipping': typeof AuthenticatedAdminShippingRoute
   '/_authenticated/agent/customers': typeof AuthenticatedAgentCustomersRoute
   '/_authenticated/agent/links': typeof AuthenticatedAgentLinksRoute
   '/_authenticated/agent/orders': typeof AuthenticatedAgentOrdersRoute
+  '/_authenticated/agent/shipping': typeof AuthenticatedAgentShippingRoute
   '/api/public/razorpay-webhook': typeof ApiPublicRazorpayWebhookRoute
   '/buy/$token/checkout': typeof BuyTokenCheckoutRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
@@ -256,9 +276,11 @@ export interface FileRouteTypes {
     | '/admin/pages'
     | '/admin/products'
     | '/admin/sales'
+    | '/admin/shipping'
     | '/agent/customers'
     | '/agent/links'
     | '/agent/orders'
+    | '/agent/shipping'
     | '/api/public/razorpay-webhook'
     | '/buy/$token/checkout'
     | '/admin/'
@@ -279,9 +301,11 @@ export interface FileRouteTypes {
     | '/admin/pages'
     | '/admin/products'
     | '/admin/sales'
+    | '/admin/shipping'
     | '/agent/customers'
     | '/agent/links'
     | '/agent/orders'
+    | '/agent/shipping'
     | '/api/public/razorpay-webhook'
     | '/buy/$token/checkout'
     | '/admin'
@@ -305,9 +329,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/pages'
     | '/_authenticated/admin/products'
     | '/_authenticated/admin/sales'
+    | '/_authenticated/admin/shipping'
     | '/_authenticated/agent/customers'
     | '/_authenticated/agent/links'
     | '/_authenticated/agent/orders'
+    | '/_authenticated/agent/shipping'
     | '/api/public/razorpay-webhook'
     | '/buy/$token/checkout'
     | '/_authenticated/admin/'
@@ -448,6 +474,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSalesRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/shipping': {
+      id: '/_authenticated/admin/shipping'
+      path: '/shipping'
+      fullPath: '/admin/shipping'
+      preLoaderRoute: typeof AuthenticatedAdminShippingRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
     '/_authenticated/agent/': {
       id: '/_authenticated/agent/'
       path: '/'
@@ -474,6 +507,13 @@ declare module '@tanstack/react-router' {
       path: '/orders'
       fullPath: '/agent/orders'
       preLoaderRoute: typeof AuthenticatedAgentOrdersRouteImport
+      parentRoute: typeof AuthenticatedAgentRoute
+    }
+    '/_authenticated/agent/shipping': {
+      id: '/_authenticated/agent/shipping'
+      path: '/shipping'
+      fullPath: '/agent/shipping'
+      preLoaderRoute: typeof AuthenticatedAgentShippingRouteImport
       parentRoute: typeof AuthenticatedAgentRoute
     }
     '/api/public/razorpay-webhook': {
@@ -509,6 +549,7 @@ interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminPagesRoute: typeof AuthenticatedAdminPagesRoute
   AuthenticatedAdminProductsRoute: typeof AuthenticatedAdminProductsRoute
   AuthenticatedAdminSalesRoute: typeof AuthenticatedAdminSalesRoute
+  AuthenticatedAdminShippingRoute: typeof AuthenticatedAdminShippingRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
 }
 
@@ -521,6 +562,7 @@ const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminPagesRoute: AuthenticatedAdminPagesRoute,
   AuthenticatedAdminProductsRoute: AuthenticatedAdminProductsRoute,
   AuthenticatedAdminSalesRoute: AuthenticatedAdminSalesRoute,
+  AuthenticatedAdminShippingRoute: AuthenticatedAdminShippingRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
 }
 
@@ -531,6 +573,7 @@ interface AuthenticatedAgentRouteChildren {
   AuthenticatedAgentCustomersRoute: typeof AuthenticatedAgentCustomersRoute
   AuthenticatedAgentLinksRoute: typeof AuthenticatedAgentLinksRoute
   AuthenticatedAgentOrdersRoute: typeof AuthenticatedAgentOrdersRoute
+  AuthenticatedAgentShippingRoute: typeof AuthenticatedAgentShippingRoute
   AuthenticatedAgentIndexRoute: typeof AuthenticatedAgentIndexRoute
 }
 
@@ -538,6 +581,7 @@ const AuthenticatedAgentRouteChildren: AuthenticatedAgentRouteChildren = {
   AuthenticatedAgentCustomersRoute: AuthenticatedAgentCustomersRoute,
   AuthenticatedAgentLinksRoute: AuthenticatedAgentLinksRoute,
   AuthenticatedAgentOrdersRoute: AuthenticatedAgentOrdersRoute,
+  AuthenticatedAgentShippingRoute: AuthenticatedAgentShippingRoute,
   AuthenticatedAgentIndexRoute: AuthenticatedAgentIndexRoute,
 }
 
