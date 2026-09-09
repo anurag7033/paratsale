@@ -80,7 +80,6 @@ function optionsFor(base: number, serviceable: boolean): ShippingOption[] {
   const surcharge = serviceable ? 0 : 40; // out-of-network pincodes go by private courier
   const round = (n: number) => Math.round((n + surcharge) / 10) * 10;
   return [
-    { id: "free", label: "Free shipping", eta: "5-7 days", amount: 0 },
     { id: "standard", label: "Standard surface", eta: "4-6 days", amount: round(base) },
     { id: "express", label: "Express air", eta: "2-3 days", amount: round(base * 1.6) },
     { id: "priority", label: "Priority next-day", eta: "1-2 days", amount: round(base * 2.2) },
