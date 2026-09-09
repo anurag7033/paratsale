@@ -101,6 +101,9 @@ export const placeOrder = createServerFn({ method: "POST" })
         shipping_city: data.city,
         shipping_state: data.state,
         shipping_pincode: data.pincode,
+        shipping_latitude: data.latitude ?? null,
+        shipping_longitude: data.longitude ?? null,
+        shipping_location_accuracy: data.locationAccuracy ?? null,
       })
       .select("id, order_number, final_amount")
       .single();
