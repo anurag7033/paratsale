@@ -129,6 +129,7 @@ export type Database = {
           purchase_link_id: string | null
           quantity: number
           shipping_address: string
+          shipping_amount: number
           shipping_city: string
           shipping_latitude: number | null
           shipping_location_accuracy: number | null
@@ -153,6 +154,7 @@ export type Database = {
           purchase_link_id?: string | null
           quantity?: number
           shipping_address?: string
+          shipping_amount?: number
           shipping_city?: string
           shipping_latitude?: number | null
           shipping_location_accuracy?: number | null
@@ -177,6 +179,7 @@ export type Database = {
           purchase_link_id?: string | null
           quantity?: number
           shipping_address?: string
+          shipping_amount?: number
           shipping_city?: string
           shipping_latitude?: number | null
           shipping_location_accuracy?: number | null
@@ -372,6 +375,7 @@ export type Database = {
           customer_id: string
           id: string
           product_id: string
+          shipping_amount: number
           status: string
           unique_token: string
           visits: number
@@ -382,6 +386,7 @@ export type Database = {
           customer_id: string
           id?: string
           product_id: string
+          shipping_amount?: number
           status?: string
           unique_token: string
           visits?: number
@@ -392,6 +397,7 @@ export type Database = {
           customer_id?: string
           id?: string
           product_id?: string
+          shipping_amount?: number
           status?: string
           unique_token?: string
           visits?: number
