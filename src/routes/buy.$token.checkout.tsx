@@ -450,6 +450,10 @@ function Checkout() {
                     <span>-{inr(discount)}</span>
                   </div>
                 )}
+                <div className="flex justify-between">
+                  <span className="text-muted-foreground">Shipping charges</span>
+                  <span>{shipping > 0 ? inr(shipping) : "Free"}</span>
+                </div>
                 <div className="flex justify-between text-lg font-bold">
                   <span>Total payable</span>
                   <span>{inr(total)}</span>
