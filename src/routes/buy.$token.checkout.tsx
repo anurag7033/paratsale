@@ -205,8 +205,7 @@ function Checkout() {
       }
 
       if (result.mode === "razorpay_unconfigured") {
-        toast.success("Order placed. Online payment isn't switched on yet, so your agent will confirm payment.");
-        void navigate({ to: "/order/$orderNumber", params: { orderNumber: result.orderNumber } });
+        toast.error("Online payment isn't switched on yet. Please contact your agent to complete the purchase.");
         return;
       }
 
@@ -227,15 +226,18 @@ function Checkout() {
         theme: { color: "#1b2a5e" },
         handler: async (response: RazorpayResponse) => {
           try {
-            await confirmPayment({ data: { orderId: result.orderId, ...response } });
+            const confirmed = await confirmPayment({
+              data: { draft: result.draft, draftSignature: result.draftSignature, ...response },
+            });
             toast.success("Payment successful — here is your invoice.");
-            void navigate({ to: "/invoice/$orderNumber", params: { orderNumber: result.orderNumber } });
+            void navigate({ to: "/invoice/$orderNumber", params: { orderNumber: confirmed.orderNumber } });
           } catch {
             toast.error("We could not verify the payment. Please contact your agent.");
           }
         },
       });
       rzp.open();
+
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Something went wrong.");
     } finally {
