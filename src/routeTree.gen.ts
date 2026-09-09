@@ -14,7 +14,6 @@ import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedAgentRouteImport } from './routes/_authenticated/agent'
-import { Route as BuyTokenRouteImport } from './routes/buy.$token'
 import { Route as InvoiceOrderNumberRouteImport } from './routes/invoice.$orderNumber'
 import { Route as OrderOrderNumberRouteImport } from './routes/order.$orderNumber'
 import { Route as ProductSlugRouteImport } from './routes/product.$slug'
@@ -58,11 +57,6 @@ const AuthenticatedAgentRoute = AuthenticatedAgentRouteImport.update({
   id: '/agent',
   path: '/agent',
   getParentRoute: () => AuthenticatedRouteRoute,
-} as any)
-const BuyTokenRoute = BuyTokenRouteImport.update({
-  id: '/buy/$token',
-  path: '/buy/$token',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const InvoiceOrderNumberRoute = InvoiceOrderNumberRouteImport.update({
   id: '/invoice/$orderNumber',
@@ -159,14 +153,14 @@ const ApiPublicRazorpayWebhookRoute =
     getParentRoute: () => rootRouteImport,
   } as any)
 const BuyTokenIndexRoute = BuyTokenIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => BuyTokenRoute,
+  id: '/buy/$token/',
+  path: '/buy/$token/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const BuyTokenCheckoutRoute = BuyTokenCheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
-  getParentRoute: () => BuyTokenRoute,
+  id: '/buy/$token/checkout',
+  path: '/buy/$token/checkout',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -174,7 +168,6 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/agent': typeof AuthenticatedAgentRouteWithChildren
-  '/buy/$token': typeof BuyTokenRouteWithChildren
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -225,7 +218,6 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/agent': typeof AuthenticatedAgentRouteWithChildren
-  '/buy/$token': typeof BuyTokenRouteWithChildren
   '/invoice/$orderNumber': typeof InvoiceOrderNumberRoute
   '/order/$orderNumber': typeof OrderOrderNumberRoute
   '/product/$slug': typeof ProductSlugRoute
@@ -253,7 +245,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/admin'
     | '/agent'
-    | '/buy/$token'
     | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
@@ -303,7 +294,6 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_authenticated/admin'
     | '/_authenticated/agent'
-    | '/buy/$token'
     | '/invoice/$orderNumber'
     | '/order/$orderNumber'
     | '/product/$slug'
@@ -329,11 +319,12 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   AuthRoute: typeof AuthRoute
-  BuyTokenRoute: typeof BuyTokenRouteWithChildren
   InvoiceOrderNumberRoute: typeof InvoiceOrderNumberRoute
   OrderOrderNumberRoute: typeof OrderOrderNumberRoute
   ProductSlugRoute: typeof ProductSlugRoute
   ApiPublicRazorpayWebhookRoute: typeof ApiPublicRazorpayWebhookRoute
+  BuyTokenCheckoutRoute: typeof BuyTokenCheckoutRoute
+  BuyTokenIndexRoute: typeof BuyTokenIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -372,13 +363,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/agent'
       preLoaderRoute: typeof AuthenticatedAgentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/buy/$token': {
-      id: '/buy/$token'
-      path: '/buy/$token'
-      fullPath: '/buy/$token'
-      preLoaderRoute: typeof BuyTokenRouteImport
-      parentRoute: typeof rootRouteImport
     }
     '/invoice/$orderNumber': {
       id: '/invoice/$orderNumber'
@@ -501,17 +485,17 @@ declare module '@tanstack/react-router' {
     }
     '/buy/$token/': {
       id: '/buy/$token/'
-      path: '/'
+      path: '/buy/$token'
       fullPath: '/buy/$token/'
       preLoaderRoute: typeof BuyTokenIndexRouteImport
-      parentRoute: typeof BuyTokenRoute
+      parentRoute: typeof rootRouteImport
     }
     '/buy/$token/checkout': {
       id: '/buy/$token/checkout'
-      path: '/checkout'
+      path: '/buy/$token/checkout'
       fullPath: '/buy/$token/checkout'
       preLoaderRoute: typeof BuyTokenCheckoutRouteImport
-      parentRoute: typeof BuyTokenRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
@@ -573,29 +557,16 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
-interface BuyTokenRouteChildren {
-  BuyTokenCheckoutRoute: typeof BuyTokenCheckoutRoute
-  BuyTokenIndexRoute: typeof BuyTokenIndexRoute
-}
-
-const BuyTokenRouteChildren: BuyTokenRouteChildren = {
-  BuyTokenCheckoutRoute: BuyTokenCheckoutRoute,
-  BuyTokenIndexRoute: BuyTokenIndexRoute,
-}
-
-const BuyTokenRouteWithChildren = BuyTokenRoute._addFileChildren(
-  BuyTokenRouteChildren,
-)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   AuthRoute: AuthRoute,
-  BuyTokenRoute: BuyTokenRouteWithChildren,
   InvoiceOrderNumberRoute: InvoiceOrderNumberRoute,
   OrderOrderNumberRoute: OrderOrderNumberRoute,
   ProductSlugRoute: ProductSlugRoute,
   ApiPublicRazorpayWebhookRoute: ApiPublicRazorpayWebhookRoute,
+  BuyTokenCheckoutRoute: BuyTokenCheckoutRoute,
+  BuyTokenIndexRoute: BuyTokenIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
