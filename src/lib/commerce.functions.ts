@@ -348,6 +348,7 @@ export const getCheckout = createServerFn({ method: "GET" })
       customer,
       agent,
       coupons: coupons ?? [],
+      shippingAmount: Math.max(0, Number(link.shipping_amount ?? 0)),
     };
   });
 
