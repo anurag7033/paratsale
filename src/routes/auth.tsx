@@ -59,11 +59,6 @@ function AuthPage() {
     navigate({ to: homeFor(userRole), replace: true });
   };
 
-  const quickFill = (kind: "admin" | "agent") => {
-    setEmail(kind === "admin" ? "admin@example.com" : "agent@example.com");
-    setPassword(kind === "admin" ? "Admin@123" : "Agent@123");
-  };
-
   return (
     <div className="grid min-h-screen lg:grid-cols-2">
       <div
@@ -142,19 +137,6 @@ function AuthPage() {
               </Button>
             </form>
 
-            <div className="mt-6 rounded-xl border bg-secondary/60 p-4 text-xs">
-              <p className="font-semibold uppercase tracking-[0.14em] text-muted-foreground">
-                Demo accounts
-              </p>
-              <div className="mt-3 flex flex-col gap-2">
-                <button type="button" onClick={() => quickFill("admin")} className="text-left hover:underline">
-                  Admin — admin@example.com / Admin@123
-                </button>
-                <button type="button" onClick={() => quickFill("agent")} className="text-left hover:underline">
-                  Agent — agent@example.com / Agent@123
-                </button>
-              </div>
-            </div>
           </CardContent>
         </Card>
       </div>
