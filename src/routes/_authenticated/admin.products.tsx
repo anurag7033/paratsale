@@ -187,14 +187,16 @@ function AdminProducts() {
         title="Products"
         description="Catalogue, pricing, stock and public product pages."
         action={
-          <Button
-            onClick={() => {
-              setForm(blank);
-              setOpen(true);
-            }}
-          >
-            <Plus className="mr-2 h-4 w-4" /> New product
-          </Button>
+          canEdit ? (
+            <Button
+              onClick={() => {
+                setForm(blank);
+                setOpen(true);
+              }}
+            >
+              <Plus className="mr-2 h-4 w-4" /> New product
+            </Button>
+          ) : undefined
         }
       />
 
@@ -257,36 +259,40 @@ function AdminProducts() {
                               <ExternalLink className="h-4 w-4" />
                             </a>
                           </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => {
-                              setForm({
-                                id: p.id,
-                                name: p.name,
-                                slug: p.slug,
-                                description: p.description,
-                                images: (p.images ?? []).join("\n"),
-                                original_price: String(p.original_price),
-                                selling_price: String(p.selling_price),
-                                category: p.category,
-                                stock: String(p.stock),
-                                specifications: specsToText(p.specifications),
-                                status: p.status,
-                              });
-                              setOpen(true);
-                            }}
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => remove.mutate(p.id)}
-                            className="text-destructive"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
+                          {canEdit && (
+                            <>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => {
+                                  setForm({
+                                    id: p.id,
+                                    name: p.name,
+                                    slug: p.slug,
+                                    description: p.description,
+                                    images: (p.images ?? []).join("\n"),
+                                    original_price: String(p.original_price),
+                                    selling_price: String(p.selling_price),
+                                    category: p.category,
+                                    stock: String(p.stock),
+                                    specifications: specsToText(p.specifications),
+                                    status: p.status,
+                                  });
+                                  setOpen(true);
+                                }}
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => remove.mutate(p.id)}
+                                className="text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
