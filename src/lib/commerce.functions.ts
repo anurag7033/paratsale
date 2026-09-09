@@ -14,6 +14,9 @@ const checkoutSchema = z.object({
   city: z.string().trim().min(2).max(80),
   state: z.string().trim().min(2).max(80),
   pincode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6 digit pincode"),
+  latitude: z.number().min(-90).max(90).optional().nullable(),
+  longitude: z.number().min(-180).max(180).optional().nullable(),
+  locationAccuracy: z.number().min(0).max(100000).optional().nullable(),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
@@ -72,6 +75,10 @@ export const placeOrder = createServerFn({ method: "POST" })
         city: data.city,
         state: data.state,
         pincode: data.pincode,
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null,
+        location_accuracy: data.locationAccuracy ?? null,
+        location_captured_at: data.latitude != null ? new Date().toISOString() : null,
       })
       .eq("id", link.customer_id);
 
