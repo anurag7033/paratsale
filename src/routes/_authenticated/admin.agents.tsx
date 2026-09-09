@@ -98,7 +98,9 @@ function AdminAgents() {
       if (!/^[^\s@]+@[^\s@]+\.[a-z]{2,}$/i.test(email)) throw new Error("Please enter a valid email address, like name@company.com.");
       if (phone.replace(/\D/g, "").length < 6) throw new Error("Please enter a valid mobile number.");
       if (form.password.length < 8) throw new Error("The temporary password needs at least 8 characters.");
-      return create({ data: { name, email, phone, password: form.password } });
+      const res = await create({ data: { name, email, phone, password: form.password } });
+      if (!res.ok) throw new Error(res.error);
+      return res;
     },
     onSuccess: () => {
       toast.success("Agent created — they can sign in immediately.");
