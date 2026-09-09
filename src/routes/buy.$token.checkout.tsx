@@ -111,7 +111,8 @@ function Checkout() {
   const savingsOnList = Math.max(0, listTotal - subtotal);
   const appliedCoupon = applied ? (data.coupons ?? []).find((c) => c.code === applied.code) : undefined;
   const discount = appliedCoupon ? (couponDiscount(appliedCoupon, subtotal).discount ?? 0) : 0;
-  const total = Math.max(0, subtotal - discount);
+  const shipping = data.found ? Number(data.shippingAmount ?? 0) : 0;
+  const total = Math.max(0, subtotal - discount) + shipping;
   const codAllowed = isCodEligible(form.city, form.pincode);
 
   function captureLocation() {
