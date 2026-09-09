@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
-import { Plus } from "lucide-react";
+import { MapPin, Plus } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { PageHeader } from "@/components/dashboard-shell";
 import { EmptyState } from "@/components/stat-card";
@@ -405,6 +405,33 @@ function AdminOrders() {
                 <p className="text-muted-foreground">
                   {detail.customer?.address}, {detail.customer?.city} — {detail.customer?.pincode}
                 </p>
+              </div>
+              <div className="space-y-1 rounded-lg border p-3">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
+                  Exact location
+                </p>
+                {detail.shipping_latitude != null && detail.shipping_longitude != null ? (
+                  <>
+                    <p className="font-mono text-xs">
+                      {Number(detail.shipping_latitude).toFixed(6)}, {Number(detail.shipping_longitude).toFixed(6)}
+                    </p>
+                    {detail.shipping_location_accuracy != null && (
+                      <p className="text-xs text-muted-foreground">
+                        Accuracy ~{Math.round(Number(detail.shipping_location_accuracy))} m
+                      </p>
+                    )}
+                    <a
+                      className="inline-flex items-center gap-1 text-xs font-medium text-primary underline"
+                      href={`https://www.google.com/maps/search/?api=1&query=${detail.shipping_latitude},${detail.shipping_longitude}`}
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <MapPin className="h-3.5 w-3.5" /> Open in Google Maps
+                    </a>
+                  </>
+                ) : (
+                  <p className="text-xs text-muted-foreground">Customer did not share GPS location.</p>
+                )}
               </div>
               <div className="space-y-1 rounded-lg border p-3">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Agent</p>
