@@ -61,6 +61,10 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          latitude: number | null
+          location_accuracy: number | null
+          location_captured_at: string | null
+          longitude: number | null
           name: string
           phone: string
           pincode: string
@@ -73,6 +77,10 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          latitude?: number | null
+          location_accuracy?: number | null
+          location_captured_at?: string | null
+          longitude?: number | null
           name: string
           phone: string
           pincode?: string
@@ -85,6 +93,10 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          latitude?: number | null
+          location_accuracy?: number | null
+          location_captured_at?: string | null
+          longitude?: number | null
           name?: string
           phone?: string
           pincode?: string
@@ -118,6 +130,9 @@ export type Database = {
           quantity: number
           shipping_address: string
           shipping_city: string
+          shipping_latitude: number | null
+          shipping_location_accuracy: number | null
+          shipping_longitude: number | null
           shipping_pincode: string
           shipping_state: string
           total_amount: number
@@ -139,6 +154,9 @@ export type Database = {
           quantity?: number
           shipping_address?: string
           shipping_city?: string
+          shipping_latitude?: number | null
+          shipping_location_accuracy?: number | null
+          shipping_longitude?: number | null
           shipping_pincode?: string
           shipping_state?: string
           total_amount?: number
@@ -160,6 +178,9 @@ export type Database = {
           quantity?: number
           shipping_address?: string
           shipping_city?: string
+          shipping_latitude?: number | null
+          shipping_location_accuracy?: number | null
+          shipping_longitude?: number | null
           shipping_pincode?: string
           shipping_state?: string
           total_amount?: number

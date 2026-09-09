@@ -204,6 +204,11 @@ function InvoicePage() {
               <p className="mt-3 text-sm leading-relaxed text-muted-foreground">
                 {order.shipping_address}, {order.shipping_city}, {order.shipping_state} — {order.shipping_pincode}
               </p>
+              {order.shipping_latitude != null && order.shipping_longitude != null && (
+                <p className="mt-2 font-mono text-xs text-muted-foreground">
+                  GPS {Number(order.shipping_latitude).toFixed(6)}, {Number(order.shipping_longitude).toFixed(6)}
+                </p>
+              )}
             </div>
             <div className="overflow-hidden rounded-xl border">
               <div className="grid grid-cols-2 gap-4 p-6">

@@ -14,6 +14,9 @@ const checkoutSchema = z.object({
   city: z.string().trim().min(2).max(80),
   state: z.string().trim().min(2).max(80),
   pincode: z.string().trim().regex(/^\d{6}$/, "Enter a valid 6 digit pincode"),
+  latitude: z.number().min(-90).max(90).optional().nullable(),
+  longitude: z.number().min(-180).max(180).optional().nullable(),
+  locationAccuracy: z.number().min(0).max(100000).optional().nullable(),
 });
 
 export type CheckoutInput = z.infer<typeof checkoutSchema>;
@@ -72,6 +75,10 @@ export const placeOrder = createServerFn({ method: "POST" })
         city: data.city,
         state: data.state,
         pincode: data.pincode,
+        latitude: data.latitude ?? null,
+        longitude: data.longitude ?? null,
+        location_accuracy: data.locationAccuracy ?? null,
+        location_captured_at: data.latitude != null ? new Date().toISOString() : null,
       })
       .eq("id", link.customer_id);
 
@@ -94,6 +101,9 @@ export const placeOrder = createServerFn({ method: "POST" })
         shipping_city: data.city,
         shipping_state: data.state,
         shipping_pincode: data.pincode,
+        shipping_latitude: data.latitude ?? null,
+        shipping_longitude: data.longitude ?? null,
+        shipping_location_accuracy: data.locationAccuracy ?? null,
       })
       .select("id, order_number, final_amount")
       .single();
@@ -288,7 +298,7 @@ export const getOrderSummary = createServerFn({ method: "GET" })
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select(
-        "order_number, quantity, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, created_at, product_id, agent_id, customer_id",
+        "order_number, quantity, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, shipping_latitude, shipping_longitude, created_at, product_id, agent_id, customer_id",
       )
       .eq("order_number", data.orderNumber.toUpperCase())
       .maybeSingle();
