@@ -55,6 +55,7 @@ export const createAgent = createServerFn({ method: "POST" })
   });
 
 const bpoSchema = accountSchema.extend({
+  commission_per_device: z.number().min(0).max(10000000).optional().default(0),
   bpo_name: z.string().trim().min(2).max(160),
   bpo_contact_person: z.string().trim().max(120).optional().default(""),
   bpo_address: z.string().trim().max(240).optional().default(""),
@@ -77,6 +78,7 @@ export const createAdmin = createServerFn({ method: "POST" })
         name: data.name,
         phone: data.phone,
         role: "admin",
+        commission_per_device: String(data.commission_per_device ?? 0),
         bpo_name: data.bpo_name,
         bpo_contact_person: data.bpo_contact_person,
         bpo_address: data.bpo_address,
