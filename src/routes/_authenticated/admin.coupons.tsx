@@ -16,6 +16,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { inr, shortDate } from "@/lib/format";
+import { useAppSession } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/admin/coupons")({
   head: () => ({
