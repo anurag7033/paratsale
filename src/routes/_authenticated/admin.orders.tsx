@@ -72,6 +72,74 @@ function AdminOrders() {
   const [payment, setPayment] = useState("all");
   const [detail, setDetail] = useState<OrderRow | null>(null);
   const { data: orders } = useOrdersQuery();
+  const { role } = useAppSession();
+  const isSuper = role === "super_admin";
+  const [open, setOpen] = useState(false);
+  const [draft, setDraft] = useState({
+    customer_id: "",
+    product_id: "",
+    coupon_id: "none",
+    quantity: "1",
+    payment_method: "cod",
+  });
+
+  const { data: options } = useQuery({
+    queryKey: ["order-options"],
+    enabled: isSuper,
+    queryFn: async () => {
+      const [{ data: customers }, { data: products }, { data: coupons }] = await Promise.all([
+        supabase.from("customers").select("id,name,phone,agent_id,address,city,state,pincode").order("name"),
+        supabase.from("products").select("id,name,selling_price,stock").eq("status", "active").order("name"),
+        supabase.from("coupons").select("*").eq("status", "active"),
+      ]);
+      return { customers: customers ?? [], products: products ?? [], coupons: coupons ?? [] };
+    },
+  });
+
+  const createOrder = useMutation({
+    mutationFn: async () => {
+      const customer = options?.customers.find((c) => c.id === draft.customer_id);
+      const product = options?.products.find((p) => p.id === draft.product_id);
+      if (!customer) throw new Error("Please choose a customer.");
+      if (!product) throw new Error("Please choose a product.");
+      const quantity = Math.max(1, Number(draft.quantity || 1));
+      const total = Number(product.selling_price) * quantity;
+      let discount = 0;
+      let couponId: string | null = null;
+      if (draft.coupon_id !== "none") {
+        const coupon = options?.coupons.find((c) => c.id === draft.coupon_id);
+        const result = couponDiscount(coupon as never, total);
+        if ("error" in result) throw new Error(result.error);
+        discount = result.discount;
+        couponId = draft.coupon_id;
+      }
+      const { error } = await supabase.from("orders").insert({
+        customer_id: customer.id,
+        agent_id: customer.agent_id,
+        product_id: product.id,
+        coupon_id: couponId,
+        quantity,
+        total_amount: total,
+        discount_amount: discount,
+        final_amount: total - discount,
+        payment_method: draft.payment_method,
+        payment_status: draft.payment_method === "cod" ? "cod_pending" : "pending",
+        order_status: "confirmed",
+        shipping_address: customer.address ?? "",
+        shipping_city: customer.city ?? "",
+        shipping_state: customer.state ?? "",
+        shipping_pincode: customer.pincode ?? "",
+      });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("Order created");
+      setOpen(false);
+      setDraft({ customer_id: "", product_id: "", coupon_id: "none", quantity: "1", payment_method: "cod" });
+      void qc.invalidateQueries({ queryKey: ["orders"] });
+    },
+    onError: (e: Error) => toast.error(e.message),
+  });
 
   const setStage = useMutation({
     mutationFn: async ({ id, order_status }: { id: string; order_status: string }) => {
