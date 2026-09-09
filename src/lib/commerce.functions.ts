@@ -360,7 +360,7 @@ export const getOrderSummary = createServerFn({ method: "GET" })
     const { data: order } = await supabaseAdmin
       .from("orders")
       .select(
-        "order_number, quantity, total_amount, discount_amount, final_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, shipping_latitude, shipping_longitude, created_at, product_id, agent_id, customer_id",
+        "order_number, quantity, total_amount, discount_amount, final_amount, shipping_amount, payment_method, payment_status, order_status, shipping_address, shipping_city, shipping_state, shipping_pincode, shipping_latitude, shipping_longitude, created_at, product_id, agent_id, customer_id",
       )
       .eq("order_number", data.orderNumber.toUpperCase())
       .maybeSingle();
