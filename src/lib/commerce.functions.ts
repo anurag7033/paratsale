@@ -63,7 +63,7 @@ export const placeOrder = createServerFn({ method: "POST" })
 
     const { data: link } = await supabaseAdmin
       .from("purchase_links")
-      .select("id, agent_id, customer_id, product_id, status")
+      .select("id, agent_id, customer_id, product_id, status, shipping_amount")
       .eq("unique_token", data.token)
       .maybeSingle();
     if (!link || link.status !== "active") throw new Error("This purchase link is no longer valid.");
