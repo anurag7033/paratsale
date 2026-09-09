@@ -131,7 +131,7 @@ function AdminCoupons() {
                   <TableHead>Usage</TableHead>
                   <TableHead>Expires</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  {canEdit && <TableHead className="text-right">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -150,16 +150,19 @@ function AdminCoupons() {
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={c.status === "active"}
+                          disabled={!canEdit}
                           onCheckedChange={(v) => update.mutate({ id: c.id, status: v ? "active" : "inactive" })}
                         />
                         <StatusDot active={c.status === "active"} />
                       </div>
                     </TableCell>
-                    <TableCell className="text-right">
-                      <Button variant="ghost" size="icon" className="text-destructive" onClick={() => remove.mutate(c.id)}>
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
+                    {canEdit && (
+                      <TableCell className="text-right">
+                        <Button variant="ghost" size="icon" className="text-destructive" onClick={() => remove.mutate(c.id)}>
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TableCell>
+                    )}
                   </TableRow>
                 ))}
               </TableBody>
