@@ -79,9 +79,10 @@ function ProductLinkPage() {
       <section className="border-b bg-gradient-to-br from-primary/10 via-background to-background">
         <div className="mx-auto grid max-w-6xl gap-8 px-4 py-10 lg:grid-cols-2 lg:items-center">
           <div className="space-y-4">
-            <div className="aspect-[4/3] overflow-hidden rounded-2xl border bg-muted shadow-[var(--shadow-card)]">
+            <div className="flex aspect-[4/3] items-center justify-center overflow-hidden rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
               {images[activeImage] ? (
-                <img src={images[activeImage]} alt={product.name} className="h-full w-full object-cover" />
+                <img src={images[activeImage]} alt={product.name} className="max-h-full max-w-full object-contain" />
+
               ) : (
                 <div className="flex h-full items-center justify-center">
                   <PackageCheck className="h-12 w-12 text-muted-foreground" />
@@ -94,11 +95,12 @@ function ProductLinkPage() {
                   <button
                     key={src}
                     onClick={() => setActiveImage(i)}
-                    className={`h-16 w-16 overflow-hidden rounded-lg border-2 ${
-                      i === activeImage ? "border-primary" : "border-transparent opacity-70"
+                    className={`flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border-2 bg-card p-1 ${
+                      i === activeImage ? "border-primary" : "border-border opacity-70"
                     }`}
                   >
-                    <img src={src} alt={`${product.name} view ${i + 1}`} className="h-full w-full object-cover" />
+                    <img src={src} alt={`${product.name} view ${i + 1}`} className="max-h-full max-w-full object-contain" />
+
                   </button>
                 ))}
               </div>

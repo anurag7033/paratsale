@@ -387,9 +387,10 @@ function Checkout() {
             </CardHeader>
             <CardContent className="space-y-4 text-sm">
               <div className="flex gap-3">
-                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg bg-muted">
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center overflow-hidden rounded-lg border bg-card p-1">
                   {images[0] ? (
-                    <img src={images[0]} alt={product.name} className="h-full w-full object-cover" />
+                    <img src={images[0]} alt={product.name} className="max-h-full max-w-full object-contain" />
+
                   ) : (
                     <PackageCheck className="h-6 w-6 text-muted-foreground" />
                   )}
