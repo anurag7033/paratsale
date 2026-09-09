@@ -298,7 +298,7 @@ export const getCheckout = createServerFn({ method: "GET" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     const { data: link } = await supabaseAdmin
       .from("purchase_links")
-      .select("id, status, visits, product_id, customer_id, agent_id")
+      .select("id, status, visits, product_id, customer_id, agent_id, shipping_amount")
       .eq("unique_token", data.token)
       .maybeSingle();
     if (!link) return { found: false as const };
