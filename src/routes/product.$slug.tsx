@@ -88,9 +88,10 @@ function ProductPage() {
 
       <main className="mx-auto max-w-6xl px-4 py-10">
         <div className="grid gap-10 lg:grid-cols-2">
-          <div className="overflow-hidden rounded-2xl border bg-muted shadow-[var(--shadow-card)]">
+          <div className="flex aspect-square items-center justify-center overflow-hidden rounded-2xl border bg-card p-4 shadow-[var(--shadow-card)]">
             {image ? (
-              <img src={image} alt={product.name} className="h-full w-full object-cover" loading="lazy" />
+              <img src={image} alt={product.name} className="max-h-full max-w-full object-contain" loading="lazy" />
+
             ) : (
               <div className="flex aspect-square items-center justify-center text-muted-foreground">
                 <PackageCheck className="h-16 w-16" />
