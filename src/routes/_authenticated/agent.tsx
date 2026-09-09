@@ -1,5 +1,5 @@
 import { Outlet, createFileRoute, redirect } from "@tanstack/react-router";
-import { LayoutDashboard, Link2, ShoppingCart, Truck, UserSquare2 } from "lucide-react";
+import { LayoutDashboard, Link2, ShoppingCart, UserSquare2 } from "lucide-react";
 import { DashboardShell, type NavGroup } from "@/components/dashboard-shell";
 import { useAppSession } from "@/lib/session";
 
@@ -14,7 +14,6 @@ const groups: NavGroup[] = [
       { title: "My Customers", to: "/agent/customers", icon: UserSquare2 },
       { title: "Purchase Links", to: "/agent/links", icon: Link2 },
       { title: "My Orders", to: "/agent/orders", icon: ShoppingCart },
-      { title: "Shipment Charges", to: "/agent/shipping", icon: Truck },
     ],
   },
 ];
