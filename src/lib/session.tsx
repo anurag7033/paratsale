@@ -12,14 +12,17 @@ export type AppSession = {
   email: string;
 };
 
+const RANK: Record<Role, number> = { super_admin: 3, admin: 2, agent: 1 };
+
+export function highestRole(roles: (string | null | undefined)[]): Role | null {
+  const valid = roles.filter((r): r is Role => r === "super_admin" || r === "admin" || r === "agent");
+  if (!valid.length) return null;
+  return valid.reduce((best, r) => (RANK[r] > RANK[best] ? r : best));
+}
+
 export async function fetchRole(userId: string): Promise<Role | null> {
-  const { data } = await supabase
-    .from("user_roles")
-    .select("role")
-    .eq("user_id", userId)
-    .limit(1)
-    .maybeSingle();
-  return (data?.role as Role) ?? null;
+  const { data } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+  return highestRole((data ?? []).map((r) => r.role));
 }
 
 export function useAppSession(): AppSession {
