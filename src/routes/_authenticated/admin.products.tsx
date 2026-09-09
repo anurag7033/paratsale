@@ -17,6 +17,7 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { inr, slugify } from "@/lib/format";
+import { useAppSession } from "@/lib/session";
 
 export const Route = createFileRoute("/_authenticated/admin/products")({
   head: () => ({
@@ -77,6 +78,8 @@ function AdminProducts() {
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState<ProductForm>(blank);
   const [uploading, setUploading] = useState(false);
+  const { role } = useAppSession();
+  const canEdit = role === "super_admin";
 
   const imageList = form.images.split("\n").map((s) => s.trim()).filter(Boolean);
 
