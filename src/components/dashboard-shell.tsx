@@ -18,6 +18,89 @@ export type NavGroup = {
   items: { title: string; to: string; icon: LucideIcon }[];
 };
 
+function SidebarShippingCalculator() {
+  const lookup = useServerFn(lookupPincode);
+  const [pincode, setPincode] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [result, setResult] = useState<PincodeResult | null>(null);
+
+  async function run() {
+    const pin = pincode.trim();
+    if (!/^\d{6}$/.test(pin)) {
+      setError("Enter a valid 6 digit pincode.");
+      setResult(null);
+      return;
+    }
+    setBusy(true);
+    setError(null);
+    try {
+      const res = await lookup({ data: { pincode: pin } });
+      setResult(res);
+      if (!res.ok) setError(res.message || "Pincode not found.");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Lookup failed.");
+      setResult(null);
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <div className="space-y-3 border-t border-sidebar-border px-3 py-4">
+      <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.16em] text-sidebar-foreground/50">
+        Shipment Charges
+      </p>
+      <div className="flex gap-2">
+        <Input
+          inputMode="numeric"
+          maxLength={6}
+          placeholder="Pincode"
+          className="h-8 flex-1 bg-sidebar-accent/50 text-sidebar-foreground placeholder:text-sidebar-foreground/40 border-sidebar-border"
+          value={pincode}
+          onChange={(e) => setPincode(e.target.value.replace(/\D/g, "").slice(0, 6))}
+          onKeyDown={(e) => {
+            if (e.key === "Enter") void run();
+          }}
+        />
+        <Button
+          size="icon"
+          className="h-8 w-8 shrink-0"
+          onClick={() => void run()}
+          disabled={busy}
+          aria-label="Check pincode"
+        >
+          {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Search className="h-4 w-4" />}
+        </Button>
+      </div>
+
+      {error && <p className="px-3 text-xs text-destructive">{error}</p>}
+
+      {result?.ok && (
+        <div className="space-y-2 px-3">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            <MapPin className="h-3 w-3 text-sidebar-foreground/70" />
+            <span className="font-medium text-sidebar-foreground">
+              {result.district ?? "—"}, {result.state ?? "—"}
+            </span>
+            <Badge variant="outline" className="h-5 px-1.5 text-[10px] border-sidebar-border text-sidebar-foreground">
+              {result.zone}
+            </Badge>
+          </div>
+          <div className="space-y-1">
+            {result.options.map((o) => (
+              <div key={o.id} className="flex items-center justify-between text-xs">
+                <span className="text-sidebar-foreground/80">{o.label}</span>
+                <span className="font-semibold text-sidebar-foreground">{inr(o.amount)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export function DashboardShell({
   groups,
   roleLabel,
