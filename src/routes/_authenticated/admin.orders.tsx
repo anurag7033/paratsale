@@ -110,7 +110,7 @@ function AdminOrders() {
         const coupon = options?.coupons.find((c) => c.id === draft.coupon_id);
         const result = couponDiscount(coupon as never, total);
         if ("error" in result) throw new Error(result.error);
-        discount = result.discount;
+        discount = (result as { discount: number }).discount;
         couponId = draft.coupon_id;
       }
       const { error } = await supabase.from("orders").insert({
@@ -166,7 +166,104 @@ function AdminOrders() {
 
   return (
     <>
-      <PageHeader title="Orders" description="Every order placed through agent links, with live payment status." />
+      <PageHeader
+        title="Orders"
+        description="Every order placed through agent links, with live payment status."
+        action={
+          isSuper ? (
+            <Button onClick={() => setOpen(true)}>
+              <Plus className="mr-2 h-4 w-4" /> New order
+            </Button>
+          ) : undefined
+        }
+      />
+
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="sm:max-w-lg">
+          <DialogHeader>
+            <DialogTitle>Create order</DialogTitle>
+          </DialogHeader>
+          <div className="grid gap-4">
+            <div className="space-y-2">
+              <Label>Customer</Label>
+              <Select value={draft.customer_id} onValueChange={(v) => setDraft((d) => ({ ...d, customer_id: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a customer" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(options?.customers ?? []).map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.name} · {c.phone}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label>Product</Label>
+              <Select value={draft.product_id} onValueChange={(v) => setDraft((d) => ({ ...d, product_id: v }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Choose a product" />
+                </SelectTrigger>
+                <SelectContent>
+                  {(options?.products ?? []).map((p) => (
+                    <SelectItem key={p.id} value={p.id}>
+                      {p.name} · {inr(p.selling_price)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label>Quantity</Label>
+                <Input
+                  type="number"
+                  min={1}
+                  value={draft.quantity}
+                  onChange={(e) => setDraft((d) => ({ ...d, quantity: e.target.value }))}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Payment</Label>
+                <Select
+                  value={draft.payment_method}
+                  onValueChange={(v) => setDraft((d) => ({ ...d, payment_method: v }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="cod">Cash on delivery</SelectItem>
+                    <SelectItem value="razorpay">Online</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Voucher code</Label>
+              <Select value={draft.coupon_id} onValueChange={(v) => setDraft((d) => ({ ...d, coupon_id: v }))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No voucher</SelectItem>
+                  {(options?.coupons ?? []).map((c) => (
+                    <SelectItem key={c.id} value={c.id}>
+                      {c.code}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => createOrder.mutate()} disabled={createOrder.isPending}>
+              Create order
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Card className="mb-6 shadow-[var(--shadow-card)]">
         <CardContent className="grid gap-4 p-4 sm:grid-cols-3">
