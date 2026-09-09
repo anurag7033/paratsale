@@ -3,15 +3,11 @@ import { queryOptions, useSuspenseQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import {
   BadgePercent,
-  Building2,
   CheckCircle2,
-  MapPin,
   PackageCheck,
-  Phone,
   ShieldCheck,
   Star,
   Truck,
-  User,
 } from "lucide-react";
 import { getCheckout } from "@/lib/commerce.functions";
 import { BrandLockup } from "@/components/brand";
