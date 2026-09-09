@@ -245,6 +245,7 @@ function AdminProducts() {
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={p.status === "active"}
+                            disabled={!canEdit}
                             onCheckedChange={(v) =>
                               toggle.mutate({ id: p.id, status: v ? "active" : "inactive" })
                             }

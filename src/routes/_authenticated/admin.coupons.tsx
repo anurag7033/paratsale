@@ -44,6 +44,8 @@ function AdminCoupons() {
   const qc = useQueryClient();
   const [open, setOpen] = useState(false);
   const [form, setForm] = useState(blank);
+  const { role } = useAppSession();
+  const canEdit = role === "super_admin";
 
   const { data: coupons } = useQuery({
     queryKey: ["coupons"],
